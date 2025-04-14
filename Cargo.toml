@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "merkle-proofs/merkle-circuit-types",
-    "merkle-proofs/merkle-circuit-sp1",
-    "merkle-proofs/merkle-circuit-logic",
+    "coprocessor-proofs/coprocessor-circuit-types",
+    "coprocessor-proofs/coprocessor-circuit-sp1",
+    "coprocessor-proofs/coprocessor-circuit-logic",
     "smt-proofs/smt-circuit-types",
     "smt-proofs/smt-circuit-sp1",
     "smt-proofs/smt-circuit-logic",

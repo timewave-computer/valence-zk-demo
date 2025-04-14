@@ -1,5 +1,5 @@
 [package]
-name = "merkle-circuit-sp1"
+name = "coprocessor-circuit-types"
 version = "0.1.0"
 edition = "2024"
 
