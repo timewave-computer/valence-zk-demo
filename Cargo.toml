@@ -1,0 +1,40 @@
+[workspace]
+members = [
+    "merkle-proofs/merkle-circuit-types",
+    "merkle-proofs/merkle-circuit-sp1",
+    "merkle-proofs/merkle-circuit-logic",
+    "smt-proofs/smt-circuit-types",
+    "smt-proofs/smt-circuit-sp1",
+    "smt-proofs/smt-circuit-logic",
+    "coprocessor",
+    "zk-programs/zk-rate/zk-rate-guest",
+    "zk-programs/zk-rate/zk-rate-program",
+]
+
+[workspace.dependencies]
+valence-coprocessor-core = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
+    "sha2",
+] }
+valence-smt = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
+    "borsh",
+    "memory",
+], default-features = false }
+
+
+common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+], default-features = false }
+ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+], default-features = false }
+
+borsh = { version = "1.5.5", features = ["derive"] }
+sp1-zkvm = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
+# not a custom branch, just a small deps fix for the release tag 4.1.7
+sp1-verifier = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
+anyhow = { version = "=1.0.97", default-features = false }
+
+
+[patch.crates-io]
+sha2 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.8-sp1-4.0.0" }

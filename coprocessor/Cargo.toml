@@ -1,0 +1,9 @@
+[package]
+name = "coprocessor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ics23-merkle-proofs.workspace = true
+ethereum-merkle-proofs.workspace = true
+common-merkle-proofs.workspace = true
