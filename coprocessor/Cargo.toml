@@ -3,7 +3,35 @@ name = "coprocessor"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "coprocessor"
+path = "src/main.rs"
+
 [dependencies]
-ics23-merkle-proofs.workspace = true
-ethereum-merkle-proofs.workspace = true
-common-merkle-proofs.workspace = true
+ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+    "serde",
+    "no-zkvm",
+], default-features = false }
+common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+    "serde",
+    "no-zkvm",
+], default-features = false }
+tokio = { version = "1.41.1", features = ["full"] }
+dotenvy = "0.15.7"
+alloy = { version = "0.12.5", features = ["full"] }
+alloy-primitives = { version = "0.8.25" }
+url = "2.5.4"
+base64 = "0.22.1"
+serde_json.workspace = true
+valence-coprocessor-core.workspace = true
+borsh.workspace = true
+coprocessor-circuit-sp1.workspace = true
+coprocessor-circuit-types.workspace = true
+sp1-sdk.workspace = true
+sp1-verifier.workspace = true
+
+[build-dependencies]
+sp1-build = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }

@@ -3,15 +3,14 @@ members = [
     "coprocessor-proofs/coprocessor-circuit-types",
     "coprocessor-proofs/coprocessor-circuit-sp1",
     "coprocessor-proofs/coprocessor-circuit-logic",
-    "smt-proofs/smt-circuit-types",
-    "smt-proofs/smt-circuit-sp1",
-    "smt-proofs/smt-circuit-logic",
     "coprocessor",
     "zk-programs/zk-rate/zk-rate-guest",
     "zk-programs/zk-rate/zk-rate-program",
 ]
 
 [workspace.dependencies]
+coprocessor-circuit-sp1 = { path = "coprocessor-proofs/coprocessor-circuit-sp1" }
+coprocessor-circuit-types = { path = "coprocessor-proofs/coprocessor-circuit-types" }
 valence-coprocessor-core = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
     "sha2",
 ] }
@@ -31,9 +30,10 @@ ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/time
 
 borsh = { version = "1.5.5", features = ["derive"] }
 sp1-zkvm = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
+sp1-sdk = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
 # not a custom branch, just a small deps fix for the release tag 4.1.7
 sp1-verifier = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
-anyhow = { version = "=1.0.97", default-features = false }
+serde_json = "1"
 
 
 [patch.crates-io]

@@ -4,3 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+sp1-zkvm.workspace = true
+common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+types = { package = "coprocessor-circuit-types", path = "../coprocessor-circuit-types" }
+borsh.workspace = true
+valence-smt.workspace = true
+valence-coprocessor-core.workspace = true
+
+[profile.dev]
+opt-level = 3
