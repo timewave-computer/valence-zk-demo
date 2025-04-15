@@ -1,6 +1,8 @@
 # ZK Valence Programs Demo
 
-A production-ready demonstration of cross-chain zero-knowledge proof verification, enabling trustless state verification across multiple blockchain ecosystems. This implementation showcases a practical application of ZK proofs for verifying state from Ethereum and Neutron Smart Contracts.
+A demonstration of cross-chain zero-knowledge proof verification, enabling trustless state verification across multiple blockchain ecosystems. This implementation showcases a practical application of ZK proofs for verifying state from Ethereum and Neutron Smart Contracts.
+
+[![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
 ## Technical Overview
 
@@ -12,7 +14,7 @@ The implementation demonstrates a complete workflow for cross-chain state verifi
 
 ## Project Structure
 
-- `coprocessor/`: Production-grade application handling coprocessor logic and proof generation
+- `coprocessor/`: application handling coprocessor logic and proof generation
 - `coprocessor-proofs/`: Circuit implementations for proof generation
   - `coprocessor-circuit-types/`: Type-safe definitions for circuit operations
   - `coprocessor-circuit-sp1/`: Optimized SP1-specific circuit implementation
@@ -112,4 +114,4 @@ If you encounter a "Failed to get Proof" error on Neutron:
 2. Note: If you select a block with height N, you must provide the app hash for block N + 1
 
 > [!WARNING]
-> This repository is under active development. While the core functionality is production-ready, some features are still being enhanced and optimized.
+> This repository is under active development. While the core functionality is implemented, some features are still being enhanced and optimized.
