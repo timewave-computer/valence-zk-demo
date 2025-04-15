@@ -76,10 +76,30 @@ async fn main() {
     let slot: U256 = alloy_primitives::U256::from(0);
     let encoded_key = (address, slot).abi_encode();
     let keccak_key = digest_keccak(&encoded_key).to_vec();
-    let (ethereum_vault_shares_account_proof, ethereum_vault_shares_storage_proof) =
+    let (ethereum_vault_balance_account_proof, ethereum_vault_balance_storage_proof) =
         ethereum_rpc_client
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&keccak_key),
+                &read_ethereum_vault_example_address(),
+                ethereum_height,
+            )
+            .await
+            .unwrap();
+
+    let account_decoded = decode_rlp_bytes(&ethereum_vault_balance_account_proof.value).unwrap();
+    ethereum_merkle_proofs.push((
+        ethereum_vault_balance_account_proof.clone(),
+        ethereum_vault_balance_storage_proof.clone(),
+        // this is the account hash
+        account_decoded.get(2).unwrap().to_vec(),
+    ));
+
+    let ethereum_balance_shares_key =
+        hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
+    let (ethereum_vault_shares_account_proof, ethereum_vault_shares_storage_proof) =
+        ethereum_rpc_client
+            .get_account_and_storage_proof(
+                &alloy::hex::encode(&ethereum_balance_shares_key),
                 &read_ethereum_vault_example_address(),
                 ethereum_height,
             )
@@ -90,25 +110,6 @@ async fn main() {
     ethereum_merkle_proofs.push((
         ethereum_vault_shares_account_proof.clone(),
         ethereum_vault_shares_storage_proof.clone(),
-        // this is the account hash
-        account_decoded.get(2).unwrap().to_vec(),
-    ));
-
-    let ethereum_balance_shares_key =
-        hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
-    let (ethereum_vault_balance_account_proof, ethereum_vault_balance_storage_proof) =
-        ethereum_rpc_client
-            .get_account_and_storage_proof(
-                &alloy::hex::encode(&ethereum_balance_shares_key),
-                &read_ethereum_vault_example_address(),
-                ethereum_height,
-            )
-            .await
-            .unwrap();
-    let account_decoded = decode_rlp_bytes(&ethereum_vault_balance_account_proof.value).unwrap();
-    ethereum_merkle_proofs.push((
-        ethereum_vault_balance_account_proof.clone(),
-        ethereum_vault_balance_storage_proof.clone(),
         // this is the account hash
         account_decoded.get(2).unwrap().to_vec(),
     ));
