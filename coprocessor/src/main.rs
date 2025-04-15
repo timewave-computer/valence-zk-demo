@@ -28,6 +28,7 @@ use url::Url;
 use valence_smt::MemorySmt;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
+pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
 
 #[tokio::main]
 async fn main() {
@@ -272,7 +273,7 @@ async fn main() {
         borsh::to_vec(&rate_application_circuit_inputs)
             .expect("Failed to serialize rate application inputs"),
     );
-    let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
+    let (pk, vk) = client.setup(RATE_APPLICATION_CIRCUIT_ELF);
 
     let proof = client
         .prove(&pk, &stdin)
