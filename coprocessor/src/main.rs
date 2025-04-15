@@ -27,6 +27,7 @@ use sp1_verifier::Groth16Verifier;
 use url::Url;
 use valence_smt::MemorySmt;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
+
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
 
@@ -161,38 +162,52 @@ async fn main() {
         )
         .unwrap();
 
-    // run the coprocessor update circuit
-    // note that this circuit is not yet complete, and for the time being only
-    // verifies the merkle proofs against the trusted domain roots
-    // later it must do the following:
-    /*
-    The coprocessor circuit must implement the following verification logic:
+    // insert the neutron light client root
+    coprocessor_root = smt_tree
+        .insert(
+            coprocessor_root,
+            "demo",
+            borsh::to_vec(&neutron_root).unwrap(),
+        )
+        .unwrap();
 
-    1. Light Client Verification:
-       - Each domain (e.g., Ethereum, Neutron) must provide a light client proof
-       - The light client root must be stored at a specific slot in the SMT tree
+    // insert the ethereum light client root
+    coprocessor_root = smt_tree
+        .insert(
+            coprocessor_root,
+            "demo",
+            borsh::to_vec(&ethereum_root).unwrap(),
+        )
+        .unwrap();
 
-    2. State Verification:
-       - For non-light-client-root leaves:
-         * Verify the leaf against the corresponding light client root
-       - For light-client-root leaves:
-         * Verify the root via a light client proof against the previous light client root
-         * Store the root at a deterministic key in the SMT tree
+    let ethereum_root_opening = smt_tree
+        .get_opening(
+            "demo",
+            coprocessor_root,
+            &borsh::to_vec(&ethereum_root).unwrap(),
+        )
+        .unwrap()
+        .unwrap();
 
-    3. Tree Structure:
-       - Light client roots must be stored as leaves in the SMT tree
-       - The storage location for each root must be deterministic
-       - The tree must maintain a chain of verified light client states
-    */
+    let neutron_root_opening = smt_tree
+        .get_opening(
+            "demo",
+            coprocessor_root,
+            &borsh::to_vec(&neutron_root).unwrap(),
+        )
+        .unwrap()
+        .unwrap();
 
     let coprocessor_circuit_inputs = CoprocessorCircuitInputs {
         ethereum_merkle_proofs: ethereum_merkle_proofs.clone(),
         neutron_merkle_proofs: neutron_merkle_proofs.clone(),
         neutron_root,
         ethereum_root,
+        ethereum_root_opening,
+        neutron_root_opening,
+        coprocessor_root,
     };
     let coprocessor_circuit_inputs_serialized = borsh::to_vec(&coprocessor_circuit_inputs).unwrap();
-    // uncomment this is if you want to run the coprocessor circuit in its current state
 
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
@@ -297,12 +312,19 @@ async fn main() {
     );
 }
 
-// Neutron Data
+/// Reads the Neutron RPC URL from environment variables
+///
+/// # Returns
+/// The Neutron RPC URL as a String
 pub(crate) fn read_neutron_rpc_url() -> String {
     dotenvy::dotenv().ok();
     env::var("NEUTRON_RPC").expect("Missing Neutron RPC url!")
 }
 
+/// Reads the Neutron block height from environment variables
+///
+/// # Returns
+/// The Neutron block height as a u64
 pub(crate) fn read_neutron_height() -> u64 {
     dotenv().ok();
     env::var("HEIGHT_NEUTRON")
@@ -311,45 +333,76 @@ pub(crate) fn read_neutron_height() -> u64 {
         .expect("Failed to parse test vector as u64: Amount")
 }
 
+/// Reads the Neutron app hash from environment variables
+///
+/// # Returns
+/// The Neutron app hash as a String
 pub(crate) fn read_neutron_app_hash() -> String {
     dotenv().ok();
     env::var("MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
 }
 
+/// Reads the Neutron vault example contract address from environment variables
+///
+/// # Returns
+/// The Neutron vault contract address as a String
 pub(crate) fn read_neutron_vault_example_address() -> String {
     dotenv().ok();
     env::var("NEUTRON_PION_1_VAULT_EXAMPLE_CONTRACT_ADDRESS")
         .expect("Missing Pion 1 Vault Contract Address!")
 }
 
+/// Reads the Neutron default account address from environment variables
+///
+/// # Returns
+/// The Neutron default account address as a String
 pub(crate) fn read_neutron_default_account_address() -> String {
     dotenv().ok();
     env::var("NEUTRON_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Neutron Default Account Address!")
 }
 
-// Ethereum Data
+/// Reads the Ethereum vault example contract address from environment variables
+///
+/// # Returns
+/// The Ethereum vault contract address as a String
 pub(crate) fn read_ethereum_vault_example_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_SEPOLIA_VAULT_EXAMPLE_CONTRACT_ADDRESS")
         .expect("Missing Sepolia Vault Contract Address!")
 }
 
+/// Reads the Ethereum vault balances storage key from environment variables
+///
+/// # Returns
+/// The Ethereum vault balances storage key as a String
 pub(crate) fn read_ethereum_vault_balances_storage_key() -> String {
     dotenv().ok();
     env::var("ETHEREUM_SEPOLIA_VAULT_BALANCES_STORAGE_KEY")
         .expect("Missing Sepolia Vault Balances Storage Key!")
 }
 
+/// Reads the Ethereum default account address from environment variables
+///
+/// # Returns
+/// The Ethereum default account address as a String
 pub(crate) fn read_ethereum_default_account_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
 }
 
+/// Reads the Ethereum RPC URL from environment variables
+///
+/// # Returns
+/// The Ethereum RPC URL as a String
 pub(crate) fn read_ethereum_rpc_url() -> String {
     dotenv().ok();
     env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
 }
 
+/// Gets the latest Ethereum block height from the RPC provider
+///
+/// # Returns
+/// The latest Ethereum block height as a u64
 pub(crate) async fn get_ethereum_height() -> u64 {
     use alloy;
     use alloy::providers::{Provider, ProviderBuilder};

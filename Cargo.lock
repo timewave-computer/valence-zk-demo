@@ -1944,6 +1944,7 @@ dependencies = [
  "common",
  "ethereum",
  "ics23-cosmos",
+ "valence-smt",
 ]
 
 [[package]]

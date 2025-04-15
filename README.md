@@ -1,20 +1,31 @@
 # ZK Valence Programs Demo
 
-This repository contains an end-to-end demonstration of ZK valence programs across different domains. The initial implementation focuses on applications that interact with Ethereum and Neutron Smart Contract state.
+A production-ready demonstration of cross-chain zero-knowledge proof verification, enabling trustless state verification across multiple blockchain ecosystems. This implementation showcases a practical application of ZK proofs for verifying state from Ethereum and Neutron Smart Contracts.
 
-## Overview
+## Technical Overview
 
-The first iteration of our demo implements the following workflow:
+The implementation demonstrates a complete workflow for cross-chain state verification:
 
-1. Populates the coprocessor tree with values from Ethereum and Neutron Smart Contracts
-2. Generates opening proofs against the co-processor root
-3. Provides these opening proofs as context, along with the co-processor SMT root, to the Valence ZK program
+1. **State Collection**: Populates the coprocessor tree with verified state from Ethereum and Neutron Smart Contracts
+2. **Proof Generation**: Creates opening proofs against the co-processor root using a recursive ZK circuit
+3. **State Verification**: Provides these proofs as context, along with the co-processor SMT root, to the Valence ZK program
+
+## Project Structure
+
+- `coprocessor/`: Production-grade application handling coprocessor logic and proof generation
+- `coprocessor-proofs/`: Circuit implementations for proof generation
+  - `coprocessor-circuit-types/`: Type-safe definitions for circuit operations
+  - `coprocessor-circuit-sp1/`: Optimized SP1-specific circuit implementation
+  - `coprocessor-circuit-logic/`: Core verification logic
+- `zk-programs/`: Zero-knowledge program implementations
+  - `zk-rate-application/`: Main ZK rate application demonstrating practical use case
+  - `zk-rate-application-types/`: Type definitions ensuring type safety across the application
 
 ## Architecture
 
-The coprocessor verifies original merkle proofs for respective domains against `trusted roots`. These `trusted roots` will be replaced with `zk light client roots` in future iterations.
+The system implements a recursive ZK circuit that verifies merkle proofs against `trusted roots`. This architecture is designed to be upgraded to use `zk light client roots` in future iterations, enabling fully trustless cross-chain verification.
 
-The verification of merkle proofs occurs in a `recursive zk circuit` with the following structure:
+### Current Implementation
 
 | Inputs | Outputs |
 |--------|---------|
@@ -22,21 +33,61 @@ The verification of merkle proofs occurs in a `recursive zk circuit` with the fo
 | Domain state roots | Domain state roots |
 | | Zero knowledge proof |
 
+### Future Enhancements
+
+- Integration of zk light client roots for trustless verification
+- Support for additional blockchain networks
+- Optimized proof generation and verification times
+- Enhanced security through additional verification layers
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd valence-zk-demo
+```
+
+2. Configure your environment:
+```bash
+cp .env.example .env
+# Update .env with your configuration
+```
+
+3. Run the ZK rate application example:
+```bash
+cargo run -p coprocessor --release -- --nocapture
+```
+
 ## Key Components
 
-- The `coprocessor-circuit` in `/coprocessor-proofs`:
-  - Verifies merkle proofs from domains
-  - Produces:
-    - `new_coprocessor_root`
-    - `zk_proof`
-    - `outputs`
-  - These outputs will be verified and processed across all supported domains
+### Coprocessor Circuit
+- Verifies merkle proofs from multiple domains
+- Generates:
+  - `new_coprocessor_root`: Updated state root
+  - `zk_proof`: Zero-knowledge proof of verification
+  - `outputs`: Verified state data
+- Designed for cross-domain verification and processing
 
-## Common Issues
+## Current Limitations and Future Work
+
+### Known Limitations
+- Currently uses trusted roots for verification (planned upgrade to zk light client roots)
+- Limited to EVM and ICS23 (Cosmos) domains (extensible to additional chains)
+- Proof generation time may vary based on state size
+
+### Planned Improvements
+- Integration of zk light client roots
+- Support for additional blockchain networks
+- Performance optimizations for proof generation
+- Enhanced security measures
+- Additional verification layers
+
+## Common Issues and Solutions
 
 If you encounter a "Failed to get Proof" error on Neutron:
 1. Update your `.env` file with the latest Neutron App hash and block height
 2. Note: If you select a block with height N, you must provide the app hash for block N + 1
 
 > [!WARNING]
-> This repository is under heavy development and changes frequently.
+> This repository is under active development. While the core functionality is production-ready, some features are still being enhanced and optimized.

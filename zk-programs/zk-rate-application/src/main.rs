@@ -20,26 +20,26 @@ fn main() {
         deserialize_ethereum_proof_value_as_U256(inputs.ethereum_vault_shares_opening.clone());
 
     // verify the SMT opening proofs against the root
-    MemorySmt::verify(
+    assert!(MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root.try_into().unwrap(),
         &inputs.ethereum_vault_balance_opening,
-    );
-    MemorySmt::verify(
+    ));
+    assert!(MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root.try_into().unwrap(),
         &inputs.ethereum_vault_shares_opening,
-    );
-    MemorySmt::verify(
+    ));
+    assert!(MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root.try_into().unwrap(),
         &inputs.neutron_vault_balance_opening,
-    );
-    MemorySmt::verify(
+    ));
+    assert!(MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root.try_into().unwrap(),
         &inputs.neutron_vault_shares_opening,
-    );
+    ));
     // commit the rate as a public output
     sp1_zkvm::io::commit_slice(
         &borsh::to_vec(&RateApplicationCircuitOutputs {

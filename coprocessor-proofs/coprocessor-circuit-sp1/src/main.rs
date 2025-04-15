@@ -7,12 +7,23 @@
 use borsh;
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
 use types::{MerkleProofInputs, MerkleProofOutputs};
+use valence_smt::MemorySmt;
 sp1_zkvm::entrypoint!(main);
 pub fn main() {
     let inputs: MerkleProofInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MerkleProofInputs");
-    // build the SMT from the merkle proofs
-    // later we will want to insert into an existing tree here
+
+    assert!(MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.ethereum_root_opening,
+    ));
+    assert!(MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.neutron_root_opening,
+    ));
+
     for ethereum_proof in inputs.ethereum_merkle_proofs {
         // verify the storage proof against the account hash
         ethereum_proof
@@ -35,6 +46,7 @@ pub fn main() {
         &borsh::to_vec(&MerkleProofOutputs {
             neutron_root: inputs.neutron_root,
             ethereum_root: inputs.ethereum_root,
+            coprocessor_root: inputs.coprocessor_root,
         })
         .unwrap(),
     );
