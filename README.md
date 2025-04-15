@@ -1,6 +1,7 @@
 # ZK Valence Programs Demo
+A comprehensive demonstration of cross-chain zero-knowledge proof verification, showcasing how to achieve trustless state verification across multiple blockchain ecosystems. This implementation provides a practical example of using ZK proofs to verify state from both Ethereum and Neutron Smart Contracts in a secure and efficient manner.
 
-A demonstration of cross-chain zero-knowledge proof verification, enabling trustless state verification across multiple blockchain ecosystems. This implementation showcases a practical application of ZK proofs for verifying state from Ethereum and Neutron Smart Contracts.
+This demo represents a complete implementation of our ZK development stack with the valence-coprocessor. While the core functionality is fully implemented, two key features are currently in development: zk light-client proofs and a production-ready SMT implementation (currently using an in-memory version). Additionally, we plan to implement abstractions for serialization and type systems across different domains.
 
 [![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
