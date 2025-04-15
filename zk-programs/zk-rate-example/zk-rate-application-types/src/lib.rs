@@ -36,9 +36,7 @@ pub struct RateApplicationCircuitOutputs {
 /// The deserialized value as a U256 number
 pub fn deserialize_ethereum_proof_value_as_u256(proof: SmtOpening) -> U256 {
     let ethereum_proof: EthereumMerkleProof = borsh::from_slice(&proof.data).unwrap();
-    let ethereum_proof_value = ethereum_proof.value;
-    let ethereum_proof_value_u256 = U256::from_be_slice(&ethereum_proof_value);
-    ethereum_proof_value_u256
+    decode_rlp_u256_alloy(&ethereum_proof.value).unwrap()
 }
 
 /// Deserializes a Neutron merkle proof value into a U256 number
@@ -53,4 +51,9 @@ pub fn deserialize_neutron_proof_value_as_u256(proof: SmtOpening) -> U256 {
     let neutron_proof_value = neutron_proof.value;
     let neutron_value_decoded = &String::from_utf8_lossy(&neutron_proof_value);
     U256::from_str_radix(serde_json::from_str(neutron_value_decoded).unwrap(), 10).unwrap()
+}
+
+use alloy_rlp::Decodable;
+fn decode_rlp_u256_alloy(mut rlp_bytes: &[u8]) -> Result<U256, String> {
+    U256::decode(&mut rlp_bytes).map_err(|e| format!("RLP decode error: {:?}", e))
 }

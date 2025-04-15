@@ -20,7 +20,7 @@ valence-smt = { git = "https://github.com/jonas089/valence-coprocessor", branch 
     "borsh",
     "memory",
 ], default-features = false }
-alloy-primitives = { version = "0.8.25" }
+alloy-primitives = { version = "0.8.25", features = ["rlp"] }
 
 common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
