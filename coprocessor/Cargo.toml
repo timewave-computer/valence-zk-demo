@@ -27,6 +27,7 @@ url = "2.5.4"
 base64 = "0.22.1"
 serde_json.workspace = true
 valence-coprocessor-core.workspace = true
+valence-smt.workspace = true
 borsh.workspace = true
 coprocessor-circuit-sp1.workspace = true
 coprocessor-circuit-types.workspace = true

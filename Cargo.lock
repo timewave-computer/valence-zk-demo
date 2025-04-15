@@ -1830,7 +1830,7 @@ checksum = "5b63caa9aa9397e2d9480a9b13673856c78d8ac123288526c37d7839f2a86990"
 [[package]]
 name = "common"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#dd543ed507dd9788fa7c5aabf759ffaf00280063"
+source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#f845dad1978c45faee3740e6a2fa6fcc005d808c"
 dependencies = [
  "anyhow",
  "serde",
@@ -1915,6 +1915,7 @@ dependencies = [
  "tokio",
  "url",
  "valence-coprocessor-core",
+ "valence-smt",
 ]
 
 [[package]]
@@ -2650,7 +2651,7 @@ dependencies = [
 [[package]]
 name = "ethereum"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#dd543ed507dd9788fa7c5aabf759ffaf00280063"
+source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#f845dad1978c45faee3740e6a2fa6fcc005d808c"
 dependencies = [
  "alloy",
  "alloy-primitives",
@@ -3409,7 +3410,7 @@ dependencies = [
 [[package]]
 name = "ics23-cosmos"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#dd543ed507dd9788fa7c5aabf759ffaf00280063"
+source = "git+https://github.com/timewave-computer/zk-merkle-proofs?branch=demo#f845dad1978c45faee3740e6a2fa6fcc005d808c"
 dependencies = [
  "anyhow",
  "base64 0.22.1",

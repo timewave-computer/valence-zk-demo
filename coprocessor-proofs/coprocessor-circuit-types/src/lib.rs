@@ -15,5 +15,5 @@ pub struct MerkleProofInputs {
 pub struct MerkleProofOutputs {
     pub neutron_root: Vec<u8>,
     pub ethereum_root: Vec<u8>,
-    pub coprocessor_root: Vec<u8>,
+    //pub coprocessor_root: Vec<u8>,
 }
