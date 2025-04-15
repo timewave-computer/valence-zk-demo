@@ -28,7 +28,7 @@ pub fn main() {
             .verify(&inputs.ethereum_root)
             .expect("Failed to verify Ethereum account proof");
         root = smt_tree
-            .insert(root, "demo", ethereum_proof.1.value.clone())
+            .insert(root, "demo", borsh::to_vec(&ethereum_proof).unwrap())
             .expect("Failed to insert");
     }
     for neutron_proof in inputs.neutron_merkle_proofs {
@@ -37,7 +37,7 @@ pub fn main() {
             .verify(&inputs.neutron_root)
             .expect("Failed to verify Neutron storage proof");
         root = smt_tree
-            .insert(root, "demo", neutron_proof.value.clone())
+            .insert(root, "demo", borsh::to_vec(&neutron_proof).unwrap())
             .expect("Failed to insert");
     }
     sp1_zkvm::io::commit_slice(

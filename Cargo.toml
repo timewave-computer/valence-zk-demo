@@ -30,7 +30,9 @@ ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/time
 
 borsh = { version = "1.5.5", features = ["derive"] }
 sp1-zkvm = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
-sp1-sdk = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
+sp1-sdk = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall", features = [
+    "native-gnark",
+] }
 # not a custom branch, just a small deps fix for the release tag 4.1.7
 sp1-verifier = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
 serde_json = "1"
