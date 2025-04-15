@@ -194,7 +194,7 @@ async fn main() {
     let coprocessor_circuit_inputs_serialized = borsh::to_vec(&coprocessor_circuit_inputs).unwrap();
     // uncomment this is if you want to run the coprocessor circuit in its current state
 
-    /*let client = ProverClient::new();
+    let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
     stdin.write_vec(coprocessor_circuit_inputs_serialized);
     let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
@@ -219,7 +219,7 @@ async fn main() {
     println!(
         "Coprocessor Circuit Outputs: {:?}",
         coprocessor_circuit_outputs
-    );*/
+    );
 
     // get the SMT openings that will be part of the input for our example application
     let neutron_balance_smt_opening = smt_tree
