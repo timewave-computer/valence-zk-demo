@@ -5,4 +5,5 @@ fn main() {
         "../coprocessor-proofs/coprocessor-circuit-sp1",
         Default::default(),
     );
+    build_program_with_args("../zk-programs/zk-rate-application", Default::default());
 }

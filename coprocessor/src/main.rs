@@ -127,19 +127,37 @@ async fn main() {
 
     // build the same SMT outside the circuit - for the demo we do everything
     // in-memory.
-    for ethereum_proof in ethereum_merkle_proofs.clone() {
-        root = smt_tree
-            .insert(root, "demo", borsh::to_vec(&ethereum_proof.0).unwrap())
-            .expect("Failed to insert");
-        root = smt_tree
-            .insert(root, "demo", borsh::to_vec(&ethereum_proof.1).unwrap())
-            .expect("Failed to insert");
-    }
-    for neutron_proof in neutron_merkle_proofs.clone() {
-        root = smt_tree
-            .insert(root, "demo", borsh::to_vec(&neutron_proof).unwrap())
-            .expect("Failed to insert");
-    }
+    root = smt_tree
+        .insert(
+            root,
+            "demo",
+            borsh::to_vec(&ethereum_vault_shares_storage_proof).unwrap(),
+        )
+        .unwrap();
+
+    root = smt_tree
+        .insert(
+            root,
+            "demo",
+            borsh::to_vec(&ethereum_vault_balance_storage_proof).unwrap(),
+        )
+        .unwrap();
+
+    root = smt_tree
+        .insert(
+            root,
+            "demo",
+            borsh::to_vec(&neutron_vault_shares_proof).unwrap(),
+        )
+        .unwrap();
+
+    root = smt_tree
+        .insert(
+            root,
+            "demo",
+            borsh::to_vec(&neutron_vault_balance_proof).unwrap(),
+        )
+        .unwrap();
 
     // run the coprocessor update circuit
     // note that this circuit is not yet complete, and for the time being only
@@ -165,7 +183,9 @@ async fn main() {
     let mut stdin = SP1Stdin::new();
     stdin.write_vec(coprocessor_circuit_inputs_serialized);
     let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
-    let proof = client
+
+    // prove the coprocessor circuit
+    /*let proof = client
         .prove(&pk, &stdin)
         .groth16()
         .run()
@@ -184,7 +204,7 @@ async fn main() {
     println!(
         "Coprocessor Circuit Outputs: {:?}",
         coprocessor_circuit_outputs
-    );
+    );*/
 
     // prepare the inputs for the first example application
     // todo: move this into the example application circuit
@@ -226,6 +246,15 @@ async fn main() {
         .unwrap()
         .expect("Failed to get neutron shares opening");
 
+    let ethereum_balance_smt_opening = smt_tree
+        .get_opening(
+            "demo",
+            root,
+            &borsh::to_vec(&ethereum_vault_balance_storage_proof).unwrap(),
+        )
+        .unwrap()
+        .expect("Failed to get ethereum balance opening");
+
     let ethereum_shares_smt_opening = smt_tree
         .get_opening(
             "demo",
@@ -235,14 +264,7 @@ async fn main() {
         .unwrap()
         .expect("Failed to get ethereum shares opening");
 
-    let ethereum_balance_smt_opening = smt_tree
-        .get_opening(
-            "demo",
-            root,
-            &borsh::to_vec(&ethereum_vault_balance_storage_proof).unwrap(),
-        )
-        .unwrap()
-        .expect("Failed to get ethereum balance opening");
+    // call the example application circuit with all the inputs
 }
 
 // Neutron Data

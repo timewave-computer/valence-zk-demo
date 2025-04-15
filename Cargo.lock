@@ -1916,6 +1916,8 @@ dependencies = [
  "url",
  "valence-coprocessor-core",
  "valence-smt",
+ "zk-rate-application",
+ "zk-rate-application-types",
 ]
 
 [[package]]
@@ -8296,11 +8298,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "zk-rate-guest"
+name = "zk-rate-application"
 version = "0.1.0"
+dependencies = [
+ "borsh",
+ "common",
+ "sp1-zkvm",
+ "valence-coprocessor-core",
+ "valence-smt",
+ "zk-rate-application-types",
+]
 
 [[package]]
-name = "zk-rate-program"
+name = "zk-rate-application-types"
 version = "0.1.0"
 
 [[package]]
