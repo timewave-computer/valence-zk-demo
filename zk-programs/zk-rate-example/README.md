@@ -22,6 +22,8 @@ Since this is a vault, we have a default account in each mapping that we are int
 | Sepolia | 0x51df57D545074bA4b2B04b5f973Efc008A2fde6E |
 | Pion-1 | neutron148w9spa5f9hcwgdy8cnejfel8ly6c2kdazuu94ja5dmy6zyet2ks6c49fd |
 
-The balance of each account on the respective chain has been initialized to `10` and the shares have also been initialized to `10`. Therefore our total cross-chain rate for this example is `10+10/10+10=20/20= 1 `.
+The balance of the sepolia account is initialized to `10`, same for the amount of shares.
+The balance on the ethereum account is initialized to `200` and the shares to `40`.
+Therefore the circuit output rate should be `5` when running the example.
 
 The values in the respective contracts can be updated by anyone. You can review and deploy the contracts yourself, they are located in `examples/contracts/CHAIN_NAME-vault-contract`.
