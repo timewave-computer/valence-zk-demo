@@ -52,5 +52,5 @@ pub fn deserialize_neutron_proof_value_as_u256(proof: SmtOpening) -> U256 {
     let neutron_proof: Ics23MerkleProof = borsh::from_slice(&proof.data).unwrap();
     let neutron_proof_value = neutron_proof.value;
     let neutron_value_decoded = &String::from_utf8_lossy(&neutron_proof_value);
-    U256::from_str_radix(serde_json::from_str(neutron_value_decoded).unwrap(), 16).unwrap()
+    U256::from_str_radix(serde_json::from_str(neutron_value_decoded).unwrap(), 10).unwrap()
 }

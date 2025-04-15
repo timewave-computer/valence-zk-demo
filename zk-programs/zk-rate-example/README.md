@@ -3,7 +3,7 @@ We currently have two mock vault contracts deployed on Sepolia (Ethereum) and Pi
 
 | Sepolia | Pion-1 |
 |---|---|
-| 0xA19ab48d011403d1aaF9061381E3595426ffe18F | neutron148w9spa5f9hcwgdy8cnejfel8ly6c2kdazuu94ja5dmy6zyet2ks6c49fd |
+| 0xcDFD71C734fd242dC1FC136f8F947ABe167aA55E | neutron148w9spa5f9hcwgdy8cnejfel8ly6c2kdazuu94ja5dmy6zyet2ks6c49fd |
 
 Both contracts have the following storage layout:
 
@@ -23,7 +23,7 @@ Since this is a vault, we have a default account in each mapping that we are int
 | Pion-1 | neutron148w9spa5f9hcwgdy8cnejfel8ly6c2kdazuu94ja5dmy6zyet2ks6c49fd |
 
 The balance of the sepolia account is initialized to `10`, same for the amount of shares.
-The balance on the ethereum account is initialized to `200` and the shares to `40`.
-Therefore the circuit output rate should be `5` when running the example.
+The balance on the ethereum account is initialized to `190` and the shares to `40`.
+Therefore the circuit output rate should be `4` when running the example.
 
 The values in the respective contracts can be updated by anyone. You can review and deploy the contracts yourself, they are located in `examples/contracts/CHAIN_NAME-vault-contract`.
