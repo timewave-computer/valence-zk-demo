@@ -26,12 +26,13 @@ use sp1_sdk::{HashableKey, ProverClient, SP1Stdin, include_elf};
 use sp1_verifier::Groth16Verifier;
 use url::Url;
 use valence_smt::MemorySmt;
+use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 
 #[tokio::main]
 async fn main() {
     let mut smt_tree = MemorySmt::default();
-    let mut root = [0; 32];
+    let mut coprocessor_root = [0; 32];
     let mut ethereum_merkle_proofs: Vec<(EthereumMerkleProof, EthereumMerkleProof, Vec<u8>)> =
         Vec::new();
     let mut neutron_merkle_proofs: Vec<Ics23MerkleProof> = Vec::new();
@@ -127,33 +128,33 @@ async fn main() {
 
     // build the same SMT outside the circuit - for the demo we do everything
     // in-memory.
-    root = smt_tree
+    coprocessor_root = smt_tree
         .insert(
-            root,
+            coprocessor_root,
             "demo",
             borsh::to_vec(&ethereum_vault_shares_storage_proof).unwrap(),
         )
         .unwrap();
 
-    root = smt_tree
+    coprocessor_root = smt_tree
         .insert(
-            root,
+            coprocessor_root,
             "demo",
             borsh::to_vec(&ethereum_vault_balance_storage_proof).unwrap(),
         )
         .unwrap();
 
-    root = smt_tree
+    coprocessor_root = smt_tree
         .insert(
-            root,
+            coprocessor_root,
             "demo",
             borsh::to_vec(&neutron_vault_shares_proof).unwrap(),
         )
         .unwrap();
 
-    root = smt_tree
+    coprocessor_root = smt_tree
         .insert(
-            root,
+            coprocessor_root,
             "demo",
             borsh::to_vec(&neutron_vault_balance_proof).unwrap(),
         )
@@ -164,12 +165,23 @@ async fn main() {
     // verifies the merkle proofs against the trusted domain roots
     // later it must do the following:
     /*
-    it must have a light client proof and the light client root must
-    be at the respective slot in the SMT tree;
-    if leaf is not lightclient root then leaf is verified
-    against light client root;
-    and light client root itself must be a leaf in the tree at a deterministic key;
-    and if leaf is light client root it is verified via a light client proof against the previous light client root
+    The coprocessor circuit must implement the following verification logic:
+
+    1. Light Client Verification:
+       - Each domain (e.g., Ethereum, Neutron) must provide a light client proof
+       - The light client root must be stored at a specific slot in the SMT tree
+
+    2. State Verification:
+       - For non-light-client-root leaves:
+         * Verify the leaf against the corresponding light client root
+       - For light-client-root leaves:
+         * Verify the root via a light client proof against the previous light client root
+         * Store the root at a deterministic key in the SMT tree
+
+    3. Tree Structure:
+       - Light client roots must be stored as leaves in the SMT tree
+       - The storage location for each root must be deterministic
+       - The tree must maintain a chain of verified light client states
     */
 
     let coprocessor_circuit_inputs = CoprocessorCircuitInputs {
@@ -179,13 +191,15 @@ async fn main() {
         ethereum_root,
     };
     let coprocessor_circuit_inputs_serialized = borsh::to_vec(&coprocessor_circuit_inputs).unwrap();
-    let client = ProverClient::new();
+    // uncomment this is if you want to run the coprocessor circuit in its current state
+
+    /*let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
     stdin.write_vec(coprocessor_circuit_inputs_serialized);
     let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
 
     // prove the coprocessor circuit
-    /*let proof = client
+    let proof = client
         .prove(&pk, &stdin)
         .groth16()
         .run()
@@ -206,32 +220,11 @@ async fn main() {
         coprocessor_circuit_outputs
     );*/
 
-    // prepare the inputs for the first example application
-    // todo: move this into the example application circuit
-    let neutron_balance = neutron_vault_balance_proof.value.clone();
-    let neutron_balance_decoded = &String::from_utf8_lossy(&neutron_balance);
-    let neutron_balance_u256 =
-        U256::from_str(serde_json::from_str(neutron_balance_decoded).unwrap()).unwrap();
-    let neutron_shares = neutron_vault_shares_proof.value.clone();
-    let neutron_shares_decoded = &String::from_utf8_lossy(&neutron_shares);
-    let neutron_shares_u256 =
-        U256::from_str(serde_json::from_str(neutron_shares_decoded).unwrap()).unwrap();
-    println!("Neutron Balance: {}", neutron_balance_u256);
-    println!("Neutron Shares: {}", neutron_shares_u256);
-
-    let ethereum_shares = ethereum_vault_shares_storage_proof.value.clone();
-    let ethereum_balance = ethereum_vault_balance_storage_proof.value.clone();
-    let ethereum_shares_u256 = U256::from_be_slice(&ethereum_shares);
-    let ethereum_balance_u256 = U256::from_be_slice(&ethereum_balance);
-    println!("Ethereum Shares: {}", ethereum_shares_u256);
-    println!("Ethereum Balance: {}", ethereum_balance_u256);
-    ////////////////////////////////
-
     // get the SMT openings that will be part of the input for our example application
     let neutron_balance_smt_opening = smt_tree
         .get_opening(
             "demo",
-            root,
+            coprocessor_root,
             &borsh::to_vec(&neutron_vault_balance_proof).unwrap(),
         )
         .unwrap()
@@ -240,7 +233,7 @@ async fn main() {
     let neutron_shares_smt_opening = smt_tree
         .get_opening(
             "demo",
-            root,
+            coprocessor_root,
             &borsh::to_vec(&neutron_vault_shares_proof).unwrap(),
         )
         .unwrap()
@@ -249,7 +242,7 @@ async fn main() {
     let ethereum_balance_smt_opening = smt_tree
         .get_opening(
             "demo",
-            root,
+            coprocessor_root,
             &borsh::to_vec(&ethereum_vault_balance_storage_proof).unwrap(),
         )
         .unwrap()
@@ -258,13 +251,49 @@ async fn main() {
     let ethereum_shares_smt_opening = smt_tree
         .get_opening(
             "demo",
-            root,
+            coprocessor_root,
             &borsh::to_vec(&ethereum_vault_shares_storage_proof).unwrap(),
         )
         .unwrap()
         .expect("Failed to get ethereum shares opening");
 
     // call the example application circuit with all the inputs
+    let rate_application_circuit_inputs = RateApplicationCircuitInputs {
+        neutron_vault_balance_opening: neutron_balance_smt_opening,
+        neutron_vault_shares_opening: neutron_shares_smt_opening,
+        ethereum_vault_balance_opening: ethereum_balance_smt_opening,
+        ethereum_vault_shares_opening: ethereum_shares_smt_opening,
+        coprocessor_root: coprocessor_root,
+    };
+
+    let client = ProverClient::new();
+    let mut stdin = SP1Stdin::new();
+    stdin.write_vec(
+        borsh::to_vec(&rate_application_circuit_inputs)
+            .expect("Failed to serialize rate application inputs"),
+    );
+    let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
+
+    let proof = client
+        .prove(&pk, &stdin)
+        .groth16()
+        .run()
+        .expect("Failed to prove");
+
+    let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
+    Groth16Verifier::verify(
+        &proof.bytes(),
+        &proof.public_values.to_vec(),
+        &vk.bytes32(),
+        groth16_vk,
+    )
+    .unwrap();
+    let rate_application_circuit_outputs: RateApplicationCircuitOutputs =
+        borsh::from_slice(proof.public_values.as_slice()).unwrap();
+    println!(
+        "Rate Application Outputs: {:?}",
+        rate_application_circuit_outputs
+    );
 }
 
 // Neutron Data

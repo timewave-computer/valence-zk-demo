@@ -22,7 +22,7 @@ ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/time
 tokio = { version = "1.41.1", features = ["full"] }
 dotenvy = "0.15.7"
 alloy = { version = "0.12.5", features = ["full"] }
-alloy-primitives = { version = "0.8.25" }
+alloy-primitives.workspace = true
 url = "2.5.4"
 base64 = "0.22.1"
 serde_json.workspace = true

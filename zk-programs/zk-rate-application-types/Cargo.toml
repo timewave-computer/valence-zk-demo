@@ -4,3 +4,17 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+borsh.workspace = true
+valence-coprocessor-core.workspace = true
+valence-smt.workspace = true
+ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+    "serde",
+], default-features = false }
+ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
+    "borsh",
+    "serde",
+], default-features = false }
+common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+alloy-primitives.workspace = true
+serde_json.workspace = true

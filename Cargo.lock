@@ -8312,6 +8312,16 @@ dependencies = [
 [[package]]
 name = "zk-rate-application-types"
 version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "borsh",
+ "common",
+ "ethereum",
+ "ics23-cosmos",
+ "serde_json",
+ "valence-coprocessor-core",
+ "valence-smt",
+]
 
 [[package]]
 name = "zkhash"
