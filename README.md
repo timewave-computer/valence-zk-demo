@@ -21,6 +21,28 @@ The implementation demonstrates a complete workflow for cross-chain state verifi
   - `zk-rate-application/`: Main ZK rate application demonstrating practical use case
   - `zk-rate-application-types/`: Type definitions ensuring type safety across the application
 
+## ZK Programs Example
+
+The project includes a practical example of a cross-chain vault rate calculation using zero-knowledge proofs. This example demonstrates how to:
+
+1. Verify state from multiple blockchains (Ethereum and Neutron)
+2. Calculate a trustless rate across different chains
+3. Generate and verify ZK proofs for the calculation
+
+### ZK rate example program
+
+The ZK rate example consists of three main components:
+
+- `zk-rate-application/`: The main ZK program that performs the rate calculation
+- `zk-rate-application-types/`: Type definitions for the circuit inputs and outputs
+- `zk-rate-application-contracts/`: Smart contracts deployed on test networks
+
+The example calculates a rate based on vault balances and shares across two chains:
+- Ethereum (Sepolia testnet)
+- Neutron (Pion-1 testnet)
+
+For detailed information about the example implementation, including contract addresses, storage layouts, and initialization values, please refer to the [ZK Rate Example README](./zk-programs/zk-rate-example/README.md).
+
 ## Architecture
 
 The system implements a recursive ZK circuit that verifies merkle proofs against `trusted roots`. This architecture is designed to be upgraded to use `zk light client roots` in future iterations, enabling fully trustless cross-chain verification.

@@ -34,7 +34,7 @@ pub struct RateApplicationCircuitOutputs {
 ///
 /// # Returns
 /// The deserialized value as a U256 number
-pub fn deserialize_ethereum_proof_value_as_U256(proof: SmtOpening) -> U256 {
+pub fn deserialize_ethereum_proof_value_as_u256(proof: SmtOpening) -> U256 {
     let ethereum_proof: EthereumMerkleProof = borsh::from_slice(&proof.data).unwrap();
     let ethereum_proof_value = ethereum_proof.value;
     let ethereum_proof_value_u256 = U256::from_be_slice(&ethereum_proof_value);
@@ -48,7 +48,7 @@ pub fn deserialize_ethereum_proof_value_as_U256(proof: SmtOpening) -> U256 {
 ///
 /// # Returns
 /// The deserialized value as a U256 number
-pub fn deserialize_neutron_proof_value_as_U256(proof: SmtOpening) -> U256 {
+pub fn deserialize_neutron_proof_value_as_u256(proof: SmtOpening) -> U256 {
     let neutron_proof: Ics23MerkleProof = borsh::from_slice(&proof.data).unwrap();
     let neutron_proof_value = neutron_proof.value;
     let neutron_value_decoded = &String::from_utf8_lossy(&neutron_proof_value);

@@ -2,7 +2,7 @@
 
 use types::{
     RateApplicationCircuitInputs, RateApplicationCircuitOutputs,
-    deserialize_ethereum_proof_value_as_U256, deserialize_neutron_proof_value_as_U256,
+    deserialize_ethereum_proof_value_as_u256, deserialize_neutron_proof_value_as_u256,
 };
 use valence_smt::MemorySmt;
 
@@ -11,13 +11,13 @@ fn main() {
     let inputs: RateApplicationCircuitInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize RateApplicationCircuitInputs");
     let neutron_balance =
-        deserialize_neutron_proof_value_as_U256(inputs.neutron_vault_balance_opening.clone());
+        deserialize_neutron_proof_value_as_u256(inputs.neutron_vault_balance_opening.clone());
     let neutron_shares =
-        deserialize_neutron_proof_value_as_U256(inputs.neutron_vault_shares_opening.clone());
+        deserialize_neutron_proof_value_as_u256(inputs.neutron_vault_shares_opening.clone());
     let ethereum_balance =
-        deserialize_ethereum_proof_value_as_U256(inputs.ethereum_vault_balance_opening.clone());
+        deserialize_ethereum_proof_value_as_u256(inputs.ethereum_vault_balance_opening.clone());
     let ethereum_shares =
-        deserialize_ethereum_proof_value_as_U256(inputs.ethereum_vault_shares_opening.clone());
+        deserialize_ethereum_proof_value_as_u256(inputs.ethereum_vault_shares_opening.clone());
 
     // verify the SMT opening proofs against the root
     assert!(MemorySmt::verify(

@@ -4,13 +4,13 @@ members = [
     "coprocessor-proofs/coprocessor-circuit-sp1",
     "coprocessor-proofs/coprocessor-circuit-logic",
     "coprocessor",
-    "zk-programs/zk-rate-application",
-    "zk-programs/zk-rate-application-types",
+    "zk-programs/zk-rate-example/zk-rate-application",
+    "zk-programs/zk-rate-example/zk-rate-application-types",
 ]
 
 [workspace.dependencies]
-zk-rate-application = { path = "zk-programs/zk-rate-application" }
-zk-rate-application-types = { path = "zk-programs/zk-rate-application-types" }
+zk-rate-application = { path = "zk-programs/zk-rate-example/zk-rate-application" }
+zk-rate-application-types = { path = "zk-programs/zk-rate-example/zk-rate-application-types" }
 coprocessor-circuit-sp1 = { path = "coprocessor-proofs/coprocessor-circuit-sp1" }
 coprocessor-circuit-types = { path = "coprocessor-proofs/coprocessor-circuit-types" }
 valence-coprocessor-core = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
