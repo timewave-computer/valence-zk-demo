@@ -1,4 +1,11 @@
 **/target
 **/forge-std
-**/cache
+zk-programs/zk-rate-example/zk-rate-application-contracts/ethereum-vault-contract/cache
+zk-programs/zk-rate-example/zk-rate-application-contracts/ethereum-vault-contract/broadcast
+zk-programs/zk-rate-example/zk-rate-application-contracts/ethereum-vault-contract/out
+
+zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/cache
+zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/broadcast
+zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/out
+
 .env

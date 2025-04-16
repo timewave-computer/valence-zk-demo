@@ -25,5 +25,3 @@ Since this is a vault, we have a default account in each mapping that we are int
 The balance of the sepolia account is initialized to `10`, same for the amount of shares.
 The balance on the ethereum account is initialized to `190` and the shares to `40`.
 Therefore the circuit output rate should be `4` when running the example.
-
-The values in the respective contracts can be updated by anyone. You can review and deploy the contracts yourself, they are located in `examples/contracts/CHAIN_NAME-vault-contract`.

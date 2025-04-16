@@ -6,6 +6,8 @@ members = [
     "coprocessor",
     "zk-programs/zk-rate-example/zk-rate-application",
     "zk-programs/zk-rate-example/zk-rate-application-types",
+    "zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/neutron-mailbox-contract",
+    "zk-programs/zk-rate-example/zk-rate-application-contracts/neutron-vault-contract",
 ]
 
 [workspace.dependencies]

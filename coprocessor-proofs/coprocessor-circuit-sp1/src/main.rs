@@ -5,49 +5,13 @@
 */
 #![no_main]
 use borsh;
-use common_merkle_proofs::merkle::types::MerkleVerifiable;
-use types::{MerkleProofInputs, MerkleProofOutputs};
-use valence_smt::MemorySmt;
+use coprocessor_circuit_logic::coprocessor_logic;
+use types::MerkleProofInputs;
 sp1_zkvm::entrypoint!(main);
 pub fn main() {
     let inputs: MerkleProofInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MerkleProofInputs");
 
-    assert!(MemorySmt::verify(
-        "demo",
-        &inputs.coprocessor_root,
-        &inputs.ethereum_root_opening,
-    ));
-    assert!(MemorySmt::verify(
-        "demo",
-        &inputs.coprocessor_root,
-        &inputs.neutron_root_opening,
-    ));
-
-    for ethereum_proof in inputs.ethereum_merkle_proofs {
-        // verify the storage proof against the account hash
-        ethereum_proof
-            .1
-            .verify(&ethereum_proof.2)
-            .expect("Failed to verify Ethereum storage proof");
-        // verify the account proof against the ethereum root
-        ethereum_proof
-            .0
-            .verify(&inputs.ethereum_root)
-            .expect("Failed to verify Ethereum account proof");
-    }
-    for neutron_proof in inputs.neutron_merkle_proofs {
-        // verify the proof against the neutron root
-        neutron_proof
-            .verify(&inputs.neutron_root)
-            .expect("Failed to verify Neutron storage proof");
-    }
-    sp1_zkvm::io::commit_slice(
-        &borsh::to_vec(&MerkleProofOutputs {
-            neutron_root: inputs.neutron_root,
-            ethereum_root: inputs.ethereum_root,
-            coprocessor_root: inputs.coprocessor_root,
-        })
-        .unwrap(),
-    );
+    let circuit_outputs = coprocessor_logic(inputs);
+    sp1_zkvm::io::commit_slice(&circuit_outputs);
 }
