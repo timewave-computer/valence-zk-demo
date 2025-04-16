@@ -6,10 +6,12 @@ use rate::run_rate_example;
 use sp1_sdk::include_elf;
 use std::env;
 
+mod examples;
+
 #[cfg(feature = "mailbox")]
-mod mailbox;
+use examples::mailbox;
 #[cfg(feature = "rate")]
-mod rate;
+use examples::rate;
 
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
