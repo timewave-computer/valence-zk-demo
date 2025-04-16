@@ -1405,12 +1405,6 @@ checksum = "89e25b6adfb930f02d1981565a6e5d9c547ac15a96606256d3b59040e5cd4ca3"
 
 [[package]]
 name = "bech32"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
-
-[[package]]
-name = "bech32"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d965446196e3b7decd44aa7ee49e31d630118f90ef12f97900f262eb915c951d"
@@ -1922,6 +1916,8 @@ dependencies = [
  "url",
  "valence-coprocessor-core",
  "valence-smt",
+ "zk-mailbox-application",
+ "zk-mailbox-application-types",
  "zk-rate-application",
  "zk-rate-application-types",
 ]
@@ -1987,23 +1983,12 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "cosmos-sdk-proto"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32560304ab4c365791fd307282f76637213d8083c1a98490c35159cd67852237"
-dependencies = [
- "prost 0.12.6",
- "prost-types 0.12.6",
- "tendermint-proto 0.34.1",
-]
-
-[[package]]
-name = "cosmos-sdk-proto"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b2f63ab112b8c8e7b8a29c891adc48f43145beb21c0bfbf562957072c1e0beb"
 dependencies = [
- "prost 0.13.5",
- "prost-types 0.13.5",
+ "prost",
+ "prost-types",
  "tendermint-proto 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2014,7 +1999,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f21bb63ec6a903510a3d01f44735dd4914724e5eccbe409e6da6833d17c7829"
 dependencies = [
  "bip32",
- "cosmos-sdk-proto 0.23.0",
+ "cosmos-sdk-proto",
  "ecdsa",
  "eyre",
  "k256",
@@ -2069,37 +2054,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "cosmwasm-schema"
-version = "2.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6984ab21b47a096e17ae4c73cea2123a704d4b6686c39421247ad67020d76f95"
-dependencies = [
- "cosmwasm-schema-derive",
- "schemars",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "cosmwasm-schema-derive"
-version = "2.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e01c9214319017f6ebd8e299036e1f717fa9bb6724e758f7d6fb2477599d1a29"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.100",
-]
-
-[[package]]
 name = "cosmwasm-std"
 version = "2.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf82335c14bd94eeb4d3c461b7aa419ecd7ea13c2efe24b97cd972bdb8044e7d"
 dependencies = [
  "base64 0.22.1",
- "bech32 0.11.0",
+ "bech32",
  "bnum",
  "cosmwasm-core",
  "cosmwasm-crypto",
@@ -2250,17 +2211,6 @@ dependencies = [
  "rand_core 0.6.4",
  "subtle-ng",
  "zeroize",
-]
-
-[[package]]
-name = "cw-storage-plus"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f13360e9007f51998d42b1bc6b7fa0141f74feae61ed5fd1e5b0a89eec7b5de1"
-dependencies = [
- "cosmwasm-std",
- "schemars",
- "serde",
 ]
 
 [[package]]
@@ -3462,7 +3412,7 @@ dependencies = [
  "blake3",
  "bytes",
  "hex",
- "prost 0.13.5",
+ "prost",
  "ripemd",
  "sha2 0.10.8",
  "sha3",
@@ -4007,54 +3957,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "neutron-mailbox-contract"
-version = "0.1.0"
-dependencies = [
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-storage-plus",
- "neutron-sdk",
- "schemars",
- "serde",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "neutron-sdk"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f633fb24dfb3c339f248930d618fdd0c868a0dd129ce1afd8369ddcc558f558a"
-dependencies = [
- "bech32 0.9.1",
- "cosmos-sdk-proto 0.20.0",
- "cosmwasm-schema",
- "cosmwasm-std",
- "prost 0.12.6",
- "prost-types 0.12.6",
- "protobuf",
- "schemars",
- "serde",
- "serde-json-wasm",
- "serde_json",
- "speedate",
- "tendermint-proto 0.34.1",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "neutron-vault-contract"
-version = "0.1.0"
-dependencies = [
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-storage-plus",
- "neutron-sdk",
- "schemars",
- "serde",
- "thiserror 1.0.69",
-]
-
-[[package]]
 name = "nix"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4150,17 +4052,6 @@ name = "num-conv"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
-
-[[package]]
-name = "num-derive"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
 
 [[package]]
 name = "num-integer"
@@ -4970,35 +4861,12 @@ dependencies = [
 
 [[package]]
 name = "prost"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deb1435c188b76130da55f17a466d252ff7b1418b2ad3e037d127b94e3411f29"
-dependencies = [
- "bytes",
- "prost-derive 0.12.6",
-]
-
-[[package]]
-name = "prost"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2796faa41db3ec313a31f7624d9286acf277b52de526150b7e69f3debf891ee5"
 dependencies = [
  "bytes",
- "prost-derive 0.13.5",
-]
-
-[[package]]
-name = "prost-derive"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
-dependencies = [
- "anyhow",
- "itertools 0.12.1",
- "proc-macro2",
- "quote",
- "syn 2.0.100",
+ "prost-derive",
 ]
 
 [[package]]
@@ -5016,40 +4884,11 @@ dependencies = [
 
 [[package]]
 name = "prost-types"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9091c90b0a32608e984ff2fa4091273cbdd755d54935c51d520887f4a1dbd5b0"
-dependencies = [
- "prost 0.12.6",
-]
-
-[[package]]
-name = "prost-types"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52c2c1bf36ddb1a1c396b3601a3cec27c2462e45f07c386894ec3ccf5332bd16"
 dependencies = [
- "prost 0.13.5",
-]
-
-[[package]]
-name = "protobuf"
-version = "3.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d65a1d4ddae7d8b5de68153b48f6aa3bba8cb002b243dbdbc55a5afbc98f99f4"
-dependencies = [
- "once_cell",
- "protobuf-support",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "protobuf-support"
-version = "3.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e36c2f31e0a47f9280fb347ef5e461ffcd2c52dd520d8e216b52f93b0b0d7d6"
-dependencies = [
- "thiserror 1.0.69",
+ "prost",
 ]
 
 [[package]]
@@ -6319,7 +6158,7 @@ source = "git+https://github.com/timewave-computer/sp1?branch=jonas%2Ffix-4.1.7-
 dependencies = [
  "bincode",
  "ctrlc",
- "prost 0.13.5",
+ "prost",
  "serde",
  "sp1-core-machine",
  "sp1-prover",
@@ -6613,7 +6452,7 @@ dependencies = [
  "p3-baby-bear",
  "p3-field",
  "p3-fri",
- "prost 0.13.5",
+ "prost",
  "reqwest 0.12.15",
  "reqwest-middleware",
  "serde",
@@ -6698,16 +6537,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "speedate"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "242f76c50fd18cbf098607090ade73a08d39cfd84ea835f3796a2c855223b19b"
-dependencies = [
- "strum 0.25.0",
- "strum_macros 0.25.3",
-]
-
-[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6743,15 +6572,6 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "strum"
-version = "0.25.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "290d54ea6f91c969195bdbcd7442c8c2a2ba87da8bf60a7ee86a235d4bc1e125"
-dependencies = [
- "strum_macros 0.25.3",
-]
-
-[[package]]
-name = "strum"
 version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
@@ -6766,19 +6586,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f64def088c51c9510a8579e3c5d67c65349dcf755e5479ad3d010aa6454e2c32"
 dependencies = [
  "strum_macros 0.27.1",
-]
-
-[[package]]
-name = "strum_macros"
-version = "0.25.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23dc1fa9ac9c169a78ba62f0b841814b7abae11bdd047b9c58f893439e309ea0"
-dependencies = [
- "heck 0.4.1",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn 2.0.100",
 ]
 
 [[package]]
@@ -7008,8 +6815,8 @@ dependencies = [
  "k256",
  "num-traits",
  "once_cell",
- "prost 0.13.5",
- "prost-types 0.13.5",
+ "prost",
+ "prost-types",
  "ripemd",
  "serde",
  "serde_bytes",
@@ -7038,8 +6845,8 @@ dependencies = [
  "futures",
  "num-traits",
  "once_cell",
- "prost 0.13.5",
- "prost-types 0.13.5",
+ "prost",
+ "prost-types",
  "serde",
  "serde_bytes",
  "serde_json",
@@ -7068,32 +6875,14 @@ dependencies = [
 
 [[package]]
 name = "tendermint-proto"
-version = "0.34.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b797dd3d2beaaee91d2f065e7bdf239dc8d80bba4a183a288bc1279dd5a69a1e"
-dependencies = [
- "bytes",
- "flex-error",
- "num-derive",
- "num-traits",
- "prost 0.12.6",
- "prost-types 0.12.6",
- "serde",
- "serde_bytes",
- "subtle-encoding",
- "time",
-]
-
-[[package]]
-name = "tendermint-proto"
 version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed14abe3b0502a3afe21ca74ca5cdd6c7e8d326d982c26f98a394445eb31d6e"
 dependencies = [
  "bytes",
  "flex-error",
- "prost 0.13.5",
- "prost-types 0.13.5",
+ "prost",
+ "prost-types",
  "serde",
  "serde_bytes",
  "subtle-encoding",
@@ -7107,8 +6896,8 @@ source = "git+https://github.com/jonas089/tendermint-rs?branch=v0.38.1-borsh#fc1
 dependencies = [
  "bytes",
  "flex-error",
- "prost 0.13.5",
- "prost-types 0.13.5",
+ "prost",
+ "prost-types",
  "serde",
  "serde_bytes",
  "subtle-encoding",
@@ -7436,7 +7225,7 @@ dependencies = [
  "hyper-util",
  "percent-encoding",
  "pin-project",
- "prost 0.13.5",
+ "prost",
  "rustls-native-certs 0.8.1",
  "rustls-pemfile 2.2.0",
  "socket2",
@@ -7643,7 +7432,7 @@ dependencies = [
  "http 1.3.1",
  "http-body-util",
  "hyper 1.6.0",
- "prost 0.13.5",
+ "prost",
  "reqwest 0.12.15",
  "serde",
  "serde_json",
@@ -8515,6 +8304,33 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.100",
+]
+
+[[package]]
+name = "zk-mailbox-application"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "common",
+ "sp1-zkvm",
+ "valence-coprocessor-core",
+ "valence-smt",
+ "zk-mailbox-application-types",
+]
+
+[[package]]
+name = "zk-mailbox-application-types"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "borsh",
+ "common",
+ "ethereum",
+ "ics23-cosmos",
+ "serde_json",
+ "valence-coprocessor-core",
+ "valence-smt",
 ]
 
 [[package]]

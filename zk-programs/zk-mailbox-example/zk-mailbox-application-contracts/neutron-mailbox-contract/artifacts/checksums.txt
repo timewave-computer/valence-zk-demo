@@ -1,1 +1,1 @@
-c724664cdc802e1896e1e2f5137ce1979faf725cfa9a49ae4a02e10bb5f77b1b  neutron_vault_contract.wasm
+ee64d54dc430ee38533e4510622a3bf8be64a442faeb4b0fe2af00329e837081  neutron_mailbox_contract.wasm

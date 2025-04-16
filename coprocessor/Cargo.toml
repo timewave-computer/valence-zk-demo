@@ -33,8 +33,14 @@ coprocessor-circuit-sp1.workspace = true
 coprocessor-circuit-types.workspace = true
 zk-rate-application.workspace = true
 zk-rate-application-types.workspace = true
+zk-mailbox-application.workspace = true
+zk-mailbox-application-types.workspace = true
 sp1-sdk.workspace = true
 sp1-verifier.workspace = true
 
 [build-dependencies]
 sp1-build = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
+
+[features]
+rate = []
+mailbox = []

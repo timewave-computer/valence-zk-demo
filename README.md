@@ -5,6 +5,30 @@ This demo represents a complete implementation of our ZK development stack with 
 
 [![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd valence-zk-demo
+```
+
+2. Configure your environment:
+```bash
+cp .env.example .env
+# Update .env with your configuration
+```
+3. Run our Example Applications
+3.1. Rate calculation example
+```rust
+cargo run -p coprocessor --release --features rate -- --nocapture
+```
+3.2. Cross-chain message mailbox example
+```rust
+cargo run -p coprocessor --release --features mailbox -- --nocapture
+```
+
 ## Technical Overview
 
 The implementation demonstrates a complete workflow for cross-chain state verification:
@@ -64,25 +88,6 @@ The system implements a recursive ZK circuit that verifies merkle proofs against
 - Support for additional blockchain networks
 - Optimized proof generation and verification times
 - Enhanced security through additional verification layers
-
-## Getting Started
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd valence-zk-demo
-```
-
-2. Configure your environment:
-```bash
-cp .env.example .env
-# Update .env with your configuration
-```
-
-3. Run the ZK rate application example:
-```bash
-cargo run -p coprocessor --release -- --nocapture
-```
 
 ## Key Components
 

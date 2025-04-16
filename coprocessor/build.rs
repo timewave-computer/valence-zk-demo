@@ -9,4 +9,8 @@ fn main() {
         "../zk-programs/zk-rate-example/zk-rate-application",
         Default::default(),
     );
+    build_program_with_args(
+        "../zk-programs/zk-mailbox-example/zk-mailbox-application",
+        Default::default(),
+    );
 }
