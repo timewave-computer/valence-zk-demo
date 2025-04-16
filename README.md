@@ -8,18 +8,19 @@ This demo represents a complete implementation of our ZK development stack with 
 
 ## Getting Started
 
-1. Clone the repository:
+### 1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd valence-zk-demo
 ```
 
-2. Configure your environment:
+### 2. Configure your environment:
 ```bash
 cp .env.example .env
 # Update .env with your configuration
 ```
-3. Run our Example Applications
+### 3. Run our Example Applications
+
 3.1. Rate calculation example
 ```rust
 cargo run -p coprocessor --release --features rate -- --nocapture
