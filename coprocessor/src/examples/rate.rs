@@ -96,13 +96,13 @@ pub async fn prove() {
     #[cfg(not(feature = "coprocessor"))]
     {
         for proof in merkle_proofs.0.clone() {
-            coprocessor.smt_root = self
+            coprocessor.smt_root = coprocessor
                 .smt_tree
                 .insert(coprocessor.smt_root, "demo", borsh::to_vec(&proof).unwrap())
                 .unwrap();
         }
         for proof in merkle_proofs.1.clone() {
-            coprocessor.smt_root = self
+            coprocessor.smt_root = coprocessor
                 .smt_tree
                 .insert(
                     coprocessor.smt_root,
