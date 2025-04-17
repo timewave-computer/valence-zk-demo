@@ -68,9 +68,9 @@ cargo run -p coprocessor --release --features rate --features coprocessor -- --n
 
 ## Benchmarks
 
-ZK Rate Application [here](zk-programs/zk-rate-example/zk-rate-application/README.md)
+ZK Rate Application [here](zk-programs/zk-rate-example/README.md)
 
-ZK Mailbox Application [here](zk-programs/zk-mailbox-example/zk-mailbox-application/README.md)
+ZK Mailbox Application [here](zk-programs/zk-mailbox-example/README.md)
 
 ### M3 macbook pro with 64 GB ram
 
