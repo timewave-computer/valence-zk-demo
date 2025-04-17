@@ -6,7 +6,7 @@ use examples::mailbox;
 use examples::rate;
 mod coprocessor;
 use sp1_sdk::include_elf;
-use std::{env, str::FromStr};
+use std::{env, str::FromStr, time::Instant};
 use tendermint_rpc::{Client, Url};
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
@@ -15,6 +15,7 @@ pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-appl
 
 #[tokio::main]
 async fn main() {
+    let start_time = Instant::now();
     #[cfg(feature = "rate")]
     {
         println!("Running rate example");
@@ -25,6 +26,9 @@ async fn main() {
         println!("Running mailbox example");
         mailbox::prove().await;
     }
+    let end_time = Instant::now();
+    let duration = end_time.duration_since(start_time);
+    println!("Time taken: {:?}", duration);
 }
 
 /// Reads the Neutron RPC URL from environment variables
