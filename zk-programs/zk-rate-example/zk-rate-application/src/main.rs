@@ -12,16 +12,12 @@ fn main() {
         .expect("Failed to deserialize RateApplicationCircuitInputs");
     let neutron_balance =
         deserialize_neutron_proof_value_as_u256(inputs.neutron_vault_balance_opening.clone());
-    println!("neutron_balance: {}", neutron_balance);
     let neutron_shares =
         deserialize_neutron_proof_value_as_u256(inputs.neutron_vault_shares_opening.clone());
-    println!("neutron_shares: {}", neutron_shares);
     let ethereum_balance =
         deserialize_ethereum_proof_value_as_u256(inputs.ethereum_vault_balance_opening.clone());
-    println!("ethereum_balance: {}", ethereum_balance);
     let ethereum_shares =
         deserialize_ethereum_proof_value_as_u256(inputs.ethereum_vault_shares_opening.clone());
-    println!("ethereum_shares: {}", ethereum_shares);
 
     // verify the SMT opening proofs against the root
     assert!(MemorySmt::verify(

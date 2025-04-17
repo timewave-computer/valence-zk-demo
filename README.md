@@ -112,13 +112,5 @@ Valence ZK implements a robust security model:
 - Additional verification layers
 - Support for receipt proofs (ERC20 events, L2 chains)
 
-## Contributing
-
-We welcome contributions to the Valence ZK ecosystem. Please see our [contribution guidelines](CONTRIBUTING.md) for more information.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
 > [!NOTE]
 > This repository is under active development. While core functionality is production-ready, some features are being enhanced for optimal performance and security.
