@@ -253,12 +253,20 @@ pub async fn run_mailbox_example() {
     );
 }
 
+/// Reads the Ethereum mailbox example contract address from environment variables
+///
+/// # Returns
+/// The Ethereum mailbox contract address as a String
 fn read_ethereum_mailbox_example_contract_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_SEPOLIA_MAILBOX_EXAMPLE_CONTRACT_ADDRESS")
         .expect("Missing Sepolia Mailbox Contract Address!")
 }
 
+/// Reads the Neutron mailbox example contract address from environment variables
+///
+/// # Returns
+/// The Neutron mailbox contract address as a String
 fn read_neutron_mailbox_example_contract_address() -> String {
     dotenv().ok();
     env::var("NEUTRON_PION_1_MAILBOX_EXAMPLE_CONTRACT_ADDRESS")

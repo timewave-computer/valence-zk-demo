@@ -44,14 +44,32 @@ pub fn deserialize_ethereum_proof_value_as_string(proof: SmtOpening) -> String {
 pub fn deserialize_neutron_proof_value_as_string(proof: SmtOpening) -> String {
     let neutron_proof: Ics23MerkleProof = borsh::from_slice(&proof.data).unwrap();
     let neutron_proof_value = neutron_proof.value;
-    let neutron_value_decoded = String::from_utf8_lossy(&neutron_proof_value);
-    neutron_value_decoded.to_string()
+    let raw_string = String::from_utf8_lossy(&neutron_proof_value).to_string();
+    // Clean the string like we do in the RLP decoder
+    raw_string
+        .chars()
+        .filter(|c| !c.is_control() || *c == '\n' || *c == '\t')
+        .collect::<String>()
+        .trim_end_matches(char::is_control)
+        .trim_matches('"')
+        .to_string()
 }
 
 use alloy_rlp::Decodable;
+/// Decodes an RLP-encoded string, stripping null bytes and non-printable characters
 fn decode_rlp_string_alloy(mut rlp_bytes: &[u8]) -> Result<String, String> {
     match String::decode(&mut rlp_bytes) {
-        Ok(s) => Ok(s),
+        Ok(s) => {
+            // Remove any trailing nulls or control characters
+            let cleaned = s
+                .chars()
+                .filter(|c| !c.is_control() || *c == '\n' || *c == '\t') // keep visible chars
+                .collect::<String>()
+                .trim_end_matches(char::is_control) // just in case
+                .to_string();
+
+            Ok(cleaned)
+        }
         Err(e) => Err(format!("RLP decode error: {:?}", e)),
     }
 }
