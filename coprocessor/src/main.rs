@@ -1,8 +1,5 @@
 use dotenvy::dotenv;
-#[cfg(feature = "mailbox")]
-use mailbox::run_mailbox_example;
-#[cfg(feature = "rate")]
-use rate::run_rate_example;
+mod coprocessor;
 use sp1_sdk::include_elf;
 use std::env;
 
@@ -22,12 +19,12 @@ async fn main() {
     #[cfg(feature = "rate")]
     {
         println!("Running rate example");
-        run_rate_example().await;
+        rate::prove().await;
     }
     #[cfg(feature = "mailbox")]
     {
         println!("Running mailbox example");
-        run_mailbox_example().await;
+        mailbox::prove().await;
     }
 }
 

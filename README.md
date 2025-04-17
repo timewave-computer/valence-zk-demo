@@ -3,6 +3,11 @@ A comprehensive demonstration of cross-chain zero-knowledge proof verification, 
 
 This demo represents a complete implementation of our ZK development stack with the valence-coprocessor. While the core functionality is fully implemented, two key features are currently in development: zk light-client proofs and a production-ready SMT implementation (currently using an in-memory version). Additionally, we plan to implement abstractions for serialization and type systems across different domains.
 
+Currently the supported domains are `Neutron` (a Cosmos-ecosystem chain) and `Ethereum`. The example contracts were deployed on their respective test networks. 
+
+Our infrastructure can easily be extended to support any Cosmos `Ics23` or EVM-comptaible chain, as the underlying merkle proofs work the same for all of these networks.
+
+
 [![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
 
