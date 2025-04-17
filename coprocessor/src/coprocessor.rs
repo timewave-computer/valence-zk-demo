@@ -15,6 +15,62 @@ use coprocessor_circuit_types::MerkleProofInputs as CoprocessorCircuitInputs;
 /// A type alias for Ethereum storage keys represented as byte vectors
 pub type EthereumKey = Vec<u8>;
 
+/// A trait defining the interface for interacting with Neutron chain state
+///
+/// This trait provides methods for retrieving and verifying state from the Neutron chain,
+/// including storage proofs and SMT openings.
+pub trait NeutronCoprocessor {
+    /// Retrieves an SMT opening for a given key in the Neutron state tree
+    ///
+    /// # Arguments
+    /// * `key` - The key to retrieve the opening for
+    ///
+    /// # Returns
+    /// An SMT opening that can be used to verify the key's value
+    fn get_neutron_opening(&mut self, key: &Vec<u8>) -> SmtOpening;
+
+    /// Fetches a storage proof for a given key at a specific block height
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to fetch the proof for
+    /// * `height` - The block height to fetch the proof from
+    ///
+    /// # Returns
+    /// The raw storage proof bytes
+    async fn get_neutron_storage_proof(&self, key: &Ics23Key, height: u64) -> Vec<u8>;
+}
+
+/// A trait defining the interface for interacting with Ethereum chain state
+///
+/// This trait provides methods for retrieving and verifying state from the Ethereum chain,
+/// including account and storage proofs.
+pub trait EthereumCoprocessor {
+    /// Retrieves an SMT opening for a given key in the Ethereum state tree
+    ///
+    /// # Arguments
+    /// * `key` - The key to retrieve the opening for
+    ///
+    /// # Returns
+    /// An SMT opening that can be used to verify the key's value
+    fn get_ethereum_opening(&mut self, key: &Vec<u8>) -> SmtOpening;
+
+    /// Fetches both account and storage proofs for a given key at a specific block height
+    ///
+    /// # Arguments
+    /// * `key` - A tuple containing the storage key and contract address
+    /// * `height` - The block height to fetch the proofs from
+    ///
+    /// # Returns
+    /// A tuple containing:
+    /// * The account proof
+    /// * The storage proof
+    async fn get_ethereum_account_and_storage_proof(
+        &self,
+        key: (EthereumKey, String),
+        height: u64,
+    ) -> (EthereumMerkleProof, EthereumMerkleProof);
+}
+
 /// A coprocessor that handles merkle proofs for both Ethereum and Neutron chains
 ///
 /// This struct maintains state for both chains including SMT trees, storage keys,
@@ -28,6 +84,9 @@ pub struct Coprocessor {
     pub neutron_storage_keys: Vec<Ics23Key>,
     /// Storage keys for Ethereum chain with their associated contract addresses
     pub ethereum_storage_keys: Vec<(EthereumKey, String)>,
+    // todo: add keys for ethereum receipts, currently unsupported but necessary for event verification
+    // for example: ERC20 Transfer events
+    // pub ethereum_receipt_keys: Vec<(EthereumKey, LogFilter)> (or similar)
     /// RPC client for interacting with Neutron chain
     pub neutron_rpc_client: Ics23MerkleRpcClient,
     /// RPC client for interacting with Ethereum chain
@@ -95,20 +154,17 @@ impl Coprocessor {
         let mut ethereum_merkle_proofs: Vec<(EthereumMerkleProof, EthereumMerkleProof, Vec<u8>)> =
             Vec::new();
         for key in self.neutron_storage_keys.iter() {
-            let proof = self
-                .neutron_rpc_client
-                .get_proof(&key.to_string(), "", neutron_height)
-                .await
-                .unwrap();
+            let proof = self.get_neutron_storage_proof(&key, neutron_height).await;
             let proof: Ics23MerkleProof = serde_json::from_slice(&proof).unwrap();
             neutron_merkle_proofs.push(proof);
         }
         for key in self.ethereum_storage_keys.iter() {
             let (account_proof, storage_proof) = self
-                .ethereum_rpc_client
-                .get_account_and_storage_proof(&alloy::hex::encode(&key.0), &key.1, ethereum_height)
-                .await
-                .unwrap();
+                .get_ethereum_account_and_storage_proof(
+                    (key.0.clone(), key.1.clone()),
+                    ethereum_height,
+                )
+                .await;
             let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
             ethereum_merkle_proofs.push((
                 account_proof,
@@ -208,32 +264,74 @@ impl Coprocessor {
             .expect("Failed to prove");
         (proof, vk)
     }
+}
 
-    /// Gets an opening for an Ethereum key in the SMT
+impl NeutronCoprocessor for Coprocessor {
+    /// Retrieves an SMT opening for a given key in the Neutron state tree
     ///
     /// # Arguments
-    /// * `key` - The key to get the opening for
+    /// * `key` - The key to retrieve the opening for
     ///
     /// # Returns
-    /// The SMT opening for the given key
-    pub fn get_ethereum_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
+    /// An SMT opening that can be used to verify the key's value
+    fn get_neutron_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
         self.smt_tree
             .get_opening("demo", self.smt_root, &key)
             .unwrap()
             .unwrap()
     }
 
-    /// Gets an opening for a Neutron key in the SMT
+    /// Fetches a storage proof for a given key at a specific block height
     ///
     /// # Arguments
-    /// * `key` - The key to get the opening for
+    /// * `key` - The storage key to fetch the proof for
+    /// * `height` - The block height to fetch the proof from
     ///
     /// # Returns
-    /// The SMT opening for the given key
-    pub fn get_neutron_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
+    /// The raw storage proof bytes
+    async fn get_neutron_storage_proof(&self, key: &Ics23Key, height: u64) -> Vec<u8> {
+        self.neutron_rpc_client
+            .get_proof(&key.to_string(), "", height)
+            .await
+            .unwrap()
+    }
+}
+
+impl EthereumCoprocessor for Coprocessor {
+    /// Retrieves an SMT opening for a given key in the Ethereum state tree
+    ///
+    /// # Arguments
+    /// * `key` - The key to retrieve the opening for
+    ///
+    /// # Returns
+    /// An SMT opening that can be used to verify the key's value
+    fn get_ethereum_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
         self.smt_tree
             .get_opening("demo", self.smt_root, &key)
             .unwrap()
             .unwrap()
+    }
+
+    /// Fetches both account and storage proofs for a given key at a specific block height
+    ///
+    /// # Arguments
+    /// * `key` - A tuple containing the storage key and contract address
+    /// * `height` - The block height to fetch the proofs from
+    ///
+    /// # Returns
+    /// A tuple containing:
+    /// * The account proof
+    /// * The storage proof
+    async fn get_ethereum_account_and_storage_proof(
+        &self,
+        key: (EthereumKey, String),
+        ethereum_height: u64,
+    ) -> (EthereumMerkleProof, EthereumMerkleProof) {
+        let (account_proof, storage_proof) = self
+            .ethereum_rpc_client
+            .get_account_and_storage_proof(&alloy::hex::encode(&key.0), &key.1, ethereum_height)
+            .await
+            .unwrap();
+        (account_proof, storage_proof)
     }
 }

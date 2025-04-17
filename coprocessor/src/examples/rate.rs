@@ -1,9 +1,10 @@
 use std::{env, str::FromStr};
 
 use crate::{
-    RATE_APPLICATION_CIRCUIT_ELF, coprocessor::Coprocessor, get_ethereum_height,
-    read_ethereum_default_account_address, read_ethereum_rpc_url, read_neutron_app_hash,
-    read_neutron_default_account_address, read_neutron_height,
+    RATE_APPLICATION_CIRCUIT_ELF,
+    coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
+    get_ethereum_height, read_ethereum_default_account_address, read_ethereum_rpc_url,
+    read_neutron_app_hash, read_neutron_default_account_address, read_neutron_height,
 };
 use alloy::{
     hex::{self, FromHex},
