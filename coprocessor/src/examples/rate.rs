@@ -1,5 +1,10 @@
 use std::{env, str::FromStr};
 
+use crate::{
+    RATE_APPLICATION_CIRCUIT_ELF, coprocessor::Coprocessor, get_ethereum_height,
+    read_ethereum_default_account_address, read_ethereum_rpc_url, read_neutron_app_hash,
+    read_neutron_default_account_address, read_neutron_height,
+};
 use alloy::{
     hex::{self, FromHex},
     providers::{Provider, ProviderBuilder},
@@ -16,12 +21,6 @@ use sp1_verifier::Groth16Verifier;
 use url::Url;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
-use crate::{
-    RATE_APPLICATION_CIRCUIT_ELF, coprocessor::Coprocessor, get_ethereum_height,
-    read_ethereum_default_account_address, read_ethereum_rpc_url, read_neutron_app_hash,
-    read_neutron_default_account_address, read_neutron_height,
-};
-
 pub async fn prove() {
     let neutron_height = read_neutron_height();
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
@@ -34,7 +33,6 @@ pub async fn prove() {
         .unwrap();
     let neutron_vault_shares_key =
         Ics23Key::new_wasm_stored_value("shares", &read_neutron_vault_example_contract_address());
-
     // required ethereum storage key(s)
     let provider = ProviderBuilder::new().on_http(Url::from_str(&read_ethereum_rpc_url()).unwrap());
     let ethereum_height = get_ethereum_height().await;
@@ -53,7 +51,6 @@ pub async fn prove() {
     let ethereum_vault_balances_key = digest_keccak(&encoded_key).to_vec();
     let ethereum_vault_contract_address = read_ethereum_vault_example_contract_address();
     let ethereum_vault_shares_key = hex::decode(read_ethereum_vault_shares_storage_key()).unwrap();
-
     let mut coprocessor = Coprocessor::from_env_with_storage_keys(
         vec![neutron_vault_balance_key, neutron_vault_shares_key],
         vec![
@@ -64,7 +61,6 @@ pub async fn prove() {
             (ethereum_vault_shares_key, ethereum_vault_contract_address),
         ],
     );
-
     let merkle_proofs = coprocessor
         .get_storage_merkle_proofs(neutron_height, ethereum_height)
         .await;
@@ -77,7 +73,6 @@ pub async fn prove() {
             neutron_root,
         )
         .await;
-
     let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
     Groth16Verifier::verify(
         &proof.bytes(),
@@ -119,7 +114,6 @@ pub async fn prove() {
             .expect("Failed to serialize rate application inputs"),
     );
     let (pk, vk) = client.setup(RATE_APPLICATION_CIRCUIT_ELF);
-
     let proof = client
         .prove(&pk, &stdin)
         .groth16()

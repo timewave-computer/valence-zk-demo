@@ -1,5 +1,7 @@
-use std::{env, str::FromStr};
-
+use crate::{
+    MAILBOX_APPLICATION_CIRCUIT_ELF, coprocessor::Coprocessor, get_ethereum_height,
+    read_ethereum_rpc_url, read_neutron_app_hash, read_neutron_height,
+};
 use alloy::{
     providers::{Provider, ProviderBuilder},
     sol_types::SolValue,
@@ -12,14 +14,10 @@ use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
+use std::{env, str::FromStr};
 use url::Url;
 use zk_mailbox_application_types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
-};
-
-use crate::{
-    MAILBOX_APPLICATION_CIRCUIT_ELF, coprocessor::Coprocessor, get_ethereum_height,
-    read_ethereum_rpc_url, read_neutron_app_hash, read_neutron_height,
 };
 
 pub async fn prove() {
@@ -68,7 +66,6 @@ pub async fn prove() {
             neutron_root,
         )
         .await;
-
     let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
     Groth16Verifier::verify(
         &proof.0.bytes(),
@@ -87,17 +84,14 @@ pub async fn prove() {
     // get the SMT openings that will be part of the input for our example application
     let ethereum_message_smt_opening = coprocessor
         .get_ethereum_opening(&borsh::to_vec(&merkle_proofs.1.first().unwrap().1).unwrap());
-
     let neutron_message_smt_opening =
         coprocessor.get_neutron_opening(&borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap());
-
     // call the example application circuit with all the inputs
     let mailbox_application_circuit_inputs = MailboxApplicationCircuitInputs {
         neutron_messages_openings: vec![neutron_message_smt_opening],
         ethereum_messages_openings: vec![ethereum_message_smt_opening],
         coprocessor_root: coprocessor.smt_root,
     };
-
     let client = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
     stdin.write_vec(
@@ -105,13 +99,11 @@ pub async fn prove() {
             .expect("Failed to serialize rate application inputs"),
     );
     let (pk, vk) = client.setup(MAILBOX_APPLICATION_CIRCUIT_ELF);
-
     let proof = client
         .prove(&pk, &stdin)
         .groth16()
         .run()
         .expect("Failed to prove");
-
     let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
     Groth16Verifier::verify(
         &proof.bytes(),

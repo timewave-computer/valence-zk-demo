@@ -12,18 +12,33 @@ use crate::{COPROCESSOR_CIRCUIT_ELF, read_ethereum_rpc_url, read_neutron_rpc_url
 use common_merkle_proofs::merkle::types::MerkleClient;
 use coprocessor_circuit_types::MerkleProofInputs as CoprocessorCircuitInputs;
 
+/// A type alias for Ethereum storage keys represented as byte vectors
 pub type EthereumKey = Vec<u8>;
 
+/// A coprocessor that handles merkle proofs for both Ethereum and Neutron chains
+///
+/// This struct maintains state for both chains including SMT trees, storage keys,
+/// and RPC clients for fetching proofs.
 pub struct Coprocessor {
+    /// The Sparse Merkle Tree used for storing and verifying proofs
     pub smt_tree: MemorySmt,
+    /// The current root hash of the SMT
     pub smt_root: [u8; 32],
+    /// Storage keys for Neutron chain
     pub neutron_storage_keys: Vec<Ics23Key>,
+    /// Storage keys for Ethereum chain with their associated contract addresses
     pub ethereum_storage_keys: Vec<(EthereumKey, String)>,
+    /// RPC client for interacting with Neutron chain
     pub neutron_rpc_client: Ics23MerkleRpcClient,
+    /// RPC client for interacting with Ethereum chain
     pub ethereum_rpc_client: EvmMerkleRpcClient,
 }
 
 impl Coprocessor {
+    /// Creates a new Coprocessor instance with configuration from environment variables
+    ///
+    /// Initializes empty storage keys and RPC clients using environment variables
+    /// for configuration.
     pub fn from_env() -> Self {
         let smt_tree = MemorySmt::default();
         let smt_root = [0; 32];
@@ -43,6 +58,11 @@ impl Coprocessor {
         }
     }
 
+    /// Creates a new Coprocessor instance with specified storage keys
+    ///
+    /// # Arguments
+    /// * `neutron_storage_keys` - Storage keys for Neutron chain
+    /// * `ethereum_storage_keys` - Storage keys for Ethereum chain with contract addresses
     pub fn from_env_with_storage_keys(
         neutron_storage_keys: Vec<Ics23Key>,
         ethereum_storage_keys: Vec<(EthereumKey, String)>,
@@ -53,6 +73,16 @@ impl Coprocessor {
         coprocessor
     }
 
+    /// Fetches merkle proofs for all configured storage keys from both chains
+    ///
+    /// # Arguments
+    /// * `neutron_height` - Block height to fetch proofs from on Neutron
+    /// * `ethereum_height` - Block height to fetch proofs from on Ethereum
+    ///
+    /// # Returns
+    /// A tuple containing:
+    /// * Vector of Neutron merkle proofs
+    /// * Vector of Ethereum merkle proofs with associated account data
     pub async fn get_storage_merkle_proofs(
         &mut self,
         neutron_height: u64,
@@ -90,6 +120,16 @@ impl Coprocessor {
         (neutron_merkle_proofs, ethereum_merkle_proofs)
     }
 
+    /// Proves the new coprocessor state in zk
+    ///
+    /// # Arguments
+    /// * `neutron_merkle_proofs` - Merkle proofs from Neutron chain
+    /// * `ethereum_merkle_proofs` - Merkle proofs from Ethereum chain
+    /// * `ethereum_root` - Root hash of Ethereum state
+    /// * `neutron_root` - Root hash of Neutron state
+    ///
+    /// # Returns
+    /// A tuple containing the SP1 proof and verifying key
     pub async fn prove_progression(
         &mut self,
         neutron_merkle_proofs: Vec<Ics23MerkleProof>,
@@ -169,6 +209,13 @@ impl Coprocessor {
         (proof, vk)
     }
 
+    /// Gets an opening for an Ethereum key in the SMT
+    ///
+    /// # Arguments
+    /// * `key` - The key to get the opening for
+    ///
+    /// # Returns
+    /// The SMT opening for the given key
     pub fn get_ethereum_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
         self.smt_tree
             .get_opening("demo", self.smt_root, &key)
@@ -176,6 +223,13 @@ impl Coprocessor {
             .unwrap()
     }
 
+    /// Gets an opening for a Neutron key in the SMT
+    ///
+    /// # Arguments
+    /// * `key` - The key to get the opening for
+    ///
+    /// # Returns
+    /// The SMT opening for the given key
     pub fn get_neutron_opening(&mut self, key: &Vec<u8>) -> SmtOpening {
         self.smt_tree
             .get_opening("demo", self.smt_root, &key)

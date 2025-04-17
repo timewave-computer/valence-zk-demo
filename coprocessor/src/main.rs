@@ -1,15 +1,12 @@
 use dotenvy::dotenv;
-mod coprocessor;
-use sp1_sdk::include_elf;
-use std::env;
-
-mod examples;
-
 #[cfg(feature = "mailbox")]
 use examples::mailbox;
 #[cfg(feature = "rate")]
 use examples::rate;
-
+mod coprocessor;
+use sp1_sdk::include_elf;
+use std::env;
+mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
 pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-application");
