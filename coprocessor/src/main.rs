@@ -1,3 +1,4 @@
+use base64::Engine;
 use dotenvy::dotenv;
 #[cfg(feature = "mailbox")]
 use examples::mailbox;
@@ -35,39 +36,19 @@ pub(crate) fn read_neutron_rpc_url() -> String {
     env::var("NEUTRON_RPC").expect("Missing Neutron RPC url!")
 }
 
-/// Reads the Neutron block height from environment variables
-///
-/// # Returns
-/// The Neutron block height as a u64
-pub(crate) async fn read_neutron_height() -> u64 {
-    let tendermint_client =
-        tendermint_rpc::HttpClient::new(Url::from_str(&read_neutron_rpc_url()).unwrap()).unwrap();
-    tendermint_client
-        .latest_block()
-        .await
-        .unwrap()
-        .block
-        .header
-        .height
-        .value()
-        - 1
-}
-
 /// Reads the Neutron app hash from environment variables
 ///
 /// # Returns
 /// The Neutron app hash as a String
-pub(crate) async fn read_neutron_app_hash() -> String {
+pub(crate) async fn get_latest_neutron_app_hash_and_height() -> (String, u64) {
     let tendermint_client =
         tendermint_rpc::HttpClient::new(Url::from_str(&read_neutron_rpc_url()).unwrap()).unwrap();
-    tendermint_client
-        .latest_block()
-        .await
-        .unwrap()
-        .block
-        .header
-        .app_hash
-        .to_string()
+    let latest_block = tendermint_client.latest_block().await.unwrap();
+    let height = latest_block.block.header.height.value() - 1;
+    let app_hash = base64::engine::general_purpose::STANDARD
+        .encode(hex::decode(latest_block.block.header.app_hash.to_string()).unwrap());
+
+    (app_hash, height)
 }
 
 /// Reads the Neutron default account address from environment variables

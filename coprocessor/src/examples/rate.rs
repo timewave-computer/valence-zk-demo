@@ -3,8 +3,9 @@ use std::{env, str::FromStr};
 use crate::{
     RATE_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
-    get_ethereum_height, read_ethereum_default_account_address, read_ethereum_rpc_url,
-    read_neutron_app_hash, read_neutron_default_account_address, read_neutron_height,
+    get_ethereum_height, get_latest_neutron_app_hash_and_height,
+    read_ethereum_default_account_address, read_ethereum_rpc_url,
+    read_neutron_default_account_address,
 };
 use alloy::{
     hex::{self, FromHex},
@@ -23,14 +24,14 @@ use url::Url;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
 pub async fn prove() {
-    let neutron_height = read_neutron_height().await;
+    let (neutron_root, neutron_height) = get_latest_neutron_app_hash_and_height().await;
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
         b"balances",
         &read_neutron_default_account_address(),
         &read_neutron_vault_example_contract_address(),
     );
     let neutron_root = base64::engine::general_purpose::STANDARD
-        .decode(read_neutron_app_hash().await)
+        .decode(neutron_root)
         .unwrap();
     let neutron_vault_shares_key =
         Ics23Key::new_wasm_stored_value("shares", &read_neutron_vault_example_contract_address());

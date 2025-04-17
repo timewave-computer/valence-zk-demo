@@ -8,6 +8,7 @@ name = "coprocessor"
 path = "src/main.rs"
 
 [dependencies]
+hex = "0.4"
 tendermint-rpc = { version = "0.38.1", features = ["http-client"] }
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
     "borsh",

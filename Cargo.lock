@@ -1907,6 +1907,7 @@ dependencies = [
  "coprocessor-circuit-types",
  "dotenvy",
  "ethereum",
+ "hex",
  "ics23-cosmos",
  "serde_json",
  "sp1-build",

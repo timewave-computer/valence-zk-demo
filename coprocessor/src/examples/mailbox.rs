@@ -1,7 +1,7 @@
 use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
-    get_ethereum_height, read_ethereum_rpc_url, read_neutron_app_hash, read_neutron_height,
+    get_ethereum_height, get_latest_neutron_app_hash_and_height, read_ethereum_rpc_url,
 };
 use alloy::{
     providers::{Provider, ProviderBuilder},
@@ -23,9 +23,9 @@ use zk_mailbox_application_types::{
 
 pub async fn prove() {
     // required neutron storage key(s)
-    let neutron_height = read_neutron_height().await;
+    let (neutron_root, neutron_height) = get_latest_neutron_app_hash_and_height().await;
     let neutron_root = base64::engine::general_purpose::STANDARD
-        .decode(read_neutron_app_hash().await)
+        .decode(neutron_root)
         .unwrap();
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
         b"messages",
