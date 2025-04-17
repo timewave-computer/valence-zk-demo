@@ -44,3 +44,4 @@ sp1-build = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/
 [features]
 rate = []
 mailbox = []
+coprocessor = []

@@ -59,28 +59,31 @@ pub async fn prove() {
     let merkle_proofs = coprocessor
         .get_storage_merkle_proofs(neutron_height, ethereum_height)
         .await;
-    let proof = coprocessor
-        .prove_progression(
-            merkle_proofs.0.clone(),
-            merkle_proofs.1.clone(),
-            ethereum_root,
-            neutron_root,
+    #[cfg(feature = "coprocessor")]
+    {
+        let proof = coprocessor
+            .prove_progression(
+                merkle_proofs.0.clone(),
+                merkle_proofs.1.clone(),
+                ethereum_root,
+                neutron_root,
+            )
+            .await;
+        let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
+        Groth16Verifier::verify(
+            &proof.0.bytes(),
+            &proof.0.public_values.to_vec(),
+            &proof.1.bytes32(),
+            groth16_vk,
         )
-        .await;
-    let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
-    Groth16Verifier::verify(
-        &proof.0.bytes(),
-        &proof.0.public_values.to_vec(),
-        &proof.1.bytes32(),
-        groth16_vk,
-    )
-    .unwrap();
-    let coprocessor_circuit_outputs: CoprocessorCircuitOutputs =
-        borsh::from_slice(proof.0.public_values.as_slice()).unwrap();
-    println!(
-        "Coprocessor Circuit Outputs: {:?}",
-        coprocessor_circuit_outputs
-    );
+        .unwrap();
+        let coprocessor_circuit_outputs: CoprocessorCircuitOutputs =
+            borsh::from_slice(proof.0.public_values.as_slice()).unwrap();
+        println!(
+            "Coprocessor Circuit Outputs: {:?}",
+            coprocessor_circuit_outputs
+        );
+    }
 
     // get the SMT openings that will be part of the input for our example application
     let ethereum_message_smt_opening = coprocessor

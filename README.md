@@ -11,29 +11,43 @@ Our infrastructure can easily be extended to support any Cosmos `Ics23` or EVM-c
 [![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
 
-## Getting Started
+# Getting Started
 
-### 1. Clone the repository:
+## 1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd valence-zk-demo
 ```
 
-### 2. Configure your environment:
+## 2. Configure your environment:
 ```bash
 cp .env.example .env
 # Update .env with your configuration
 ```
-### 3. Run our Example Applications
+## 3. Run our Example Applications
 
-3.1. Rate calculation example
+### 3.1. Rate calculation example
 ```rust
 cargo run -p coprocessor --release --features rate -- --nocapture
 ```
-3.2. Cross-chain message mailbox example
+### 3.2. Cross-chain message mailbox example
 ```rust
 cargo run -p coprocessor --release --features mailbox -- --nocapture
 ```
+
+### 3.3. Prove the inculsion of the values in the Coprocessor
+For each example that you run, you can choose to also prove the inclusion of 
+the values in the coprocessor e.g. generate the `coprocessor progression/step proof`.
+
+Note that this adds extra overhead to your simulation, but it will be closer to the security
+guarantees that we want to see in production. 
+
+To run with the coprocessor prover, pass the `coprocessor` feature flag:
+
+```rust
+cargo run -p coprocessor --release --features rate --features coprocessor -- --nocapture
+```
+...
 
 ## Technical Overview
 
