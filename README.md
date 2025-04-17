@@ -7,7 +7,6 @@ Valence ZK is a revolutionary framework that simplifies cross-blockchain develop
 - **Trustless Cross-Chain Verification**: Verify state across different blockchains without relying on trusted intermediaries
 - **Developer-First Design**: Abstract complex cryptographic operations like Merkle proofs into simple, composable interfaces
 - **Modular Architecture**: Extensible trait system allows easy integration with new blockchain networks
-- **Production-Ready**: Fully implemented core functionality with support for Ethereum and Cosmos-based chains
 - **Future-Proof**: Designed for seamless integration with upcoming zk light client proofs
 
 ## Technical Architecture
@@ -62,7 +61,7 @@ cargo run -p coprocessor --release --features mailbox -- --nocapture
 ```
 
 #### Advanced: Coprocessor Proof Generation
-For production-grade security guarantees:
+For near production-grade security guarantees (currently missing ZK light client proofs):
 ```bash
 cargo run -p coprocessor --release --features rate --features coprocessor -- --nocapture
 ```
@@ -99,18 +98,14 @@ Valence ZK implements a robust security model:
 
 ## Development Roadmap
 
-### Current Focus
+- Support alternative environments (Solana)
 - Integration of zk light client roots
-- Production-ready SMT implementation
 - Enhanced serialization and type system abstractions
-- Performance optimization of recursive proofs
-
-### Future Enhancements
-- Support for additional blockchain networks
 - Performance optimizations
-- Enhanced security measures
-- Additional verification layers
-- Support for receipt proofs (ERC20 events, L2 chains)
+- Deployments and Blockops
+- Support for receipt proofs (ERC20 events)
+- Support for Layer 2 EVM networks (Optimism, Arbitrum)
+
 
 > [!NOTE]
-> This repository is under active development. While core functionality is production-ready, some features are being enhanced for optimal performance and security.
+> This repository is under active development. While core functionality is implemented, some features are being enhanced for optimal performance and security.
