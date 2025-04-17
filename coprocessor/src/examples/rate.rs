@@ -23,14 +23,14 @@ use url::Url;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
 pub async fn prove() {
-    let neutron_height = read_neutron_height();
+    let neutron_height = read_neutron_height().await;
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
         b"balances",
         &read_neutron_default_account_address(),
         &read_neutron_vault_example_contract_address(),
     );
     let neutron_root = base64::engine::general_purpose::STANDARD
-        .decode(read_neutron_app_hash())
+        .decode(read_neutron_app_hash().await)
         .unwrap();
     let neutron_vault_shares_key =
         Ics23Key::new_wasm_stored_value("shares", &read_neutron_vault_example_contract_address());
@@ -90,6 +90,26 @@ pub async fn prove() {
             "Coprocessor Circuit Outputs: {:?}",
             coprocessor_circuit_outputs
         );
+    }
+
+    #[cfg(not(feature = "coprocessor"))]
+    {
+        for proof in merkle_proofs.0.clone() {
+            coprocessor.smt_root = self
+                .smt_tree
+                .insert(coprocessor.smt_root, "demo", borsh::to_vec(&proof).unwrap())
+                .unwrap();
+        }
+        for proof in merkle_proofs.1.clone() {
+            coprocessor.smt_root = self
+                .smt_tree
+                .insert(
+                    coprocessor.smt_root,
+                    "demo",
+                    borsh::to_vec(&proof.1).unwrap(),
+                )
+                .unwrap();
+        }
     }
 
     // get the SMT openings that will be part of the input for our example application

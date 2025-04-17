@@ -5,7 +5,8 @@ use examples::mailbox;
 use examples::rate;
 mod coprocessor;
 use sp1_sdk::include_elf;
-use std::env;
+use std::{env, str::FromStr};
+use tendermint_rpc::{Client, Url};
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
@@ -38,21 +39,35 @@ pub(crate) fn read_neutron_rpc_url() -> String {
 ///
 /// # Returns
 /// The Neutron block height as a u64
-pub(crate) fn read_neutron_height() -> u64 {
-    dotenv().ok();
-    env::var("HEIGHT_NEUTRON")
-        .expect("Missing Neutron TEST VECTOR: HEIGHT!")
-        .parse::<u64>()
-        .expect("Failed to parse test vector as u64: Amount")
+pub(crate) async fn read_neutron_height() -> u64 {
+    let tendermint_client =
+        tendermint_rpc::HttpClient::new(Url::from_str(&read_neutron_rpc_url()).unwrap()).unwrap();
+    tendermint_client
+        .latest_block()
+        .await
+        .unwrap()
+        .block
+        .header
+        .height
+        .value()
+        - 1
 }
 
 /// Reads the Neutron app hash from environment variables
 ///
 /// # Returns
 /// The Neutron app hash as a String
-pub(crate) fn read_neutron_app_hash() -> String {
-    dotenv().ok();
-    env::var("MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
+pub(crate) async fn read_neutron_app_hash() -> String {
+    let tendermint_client =
+        tendermint_rpc::HttpClient::new(Url::from_str(&read_neutron_rpc_url()).unwrap()).unwrap();
+    tendermint_client
+        .latest_block()
+        .await
+        .unwrap()
+        .block
+        .header
+        .app_hash
+        .to_string()
 }
 
 /// Reads the Neutron default account address from environment variables
