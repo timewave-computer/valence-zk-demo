@@ -125,7 +125,7 @@ Valence ZK implements a robust security model:
 
 The framework includes a practical example demonstrating trustless message passing between Ethereum and Neutron mailboxes. This example showcases:
 
-For detailed implementation details, see the [ZK Message Example README](./zk-programs/zk-message-example/README.md).
+For detailed implementation details, see the [ZK Message Example README](./zk-programs/zk-mailbox-example/README.md).
 
 ## Security and Trust Model
 
