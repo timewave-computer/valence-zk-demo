@@ -135,15 +135,38 @@ Valence ZK implements a robust security model:
 - **Recursive ZK Circuits**: Verifies Merkle proofs against trusted roots
 - **Future-Proof**: Designed for seamless integration with zk light client proofs
 
+## ZK Light Client Integration Requirements
+
+To achieve full production-grade security, Valence ZK requires the following steps:
+
+1. **Deploy Coprocessor State Contract**
+   - Initialize with genesis state for supported chains (e.g., Ethereum and Neutron roots at specific heights)
+
+2. **Implement ZK Light Client Interfaces**
+   - Replace mock implementations with real ZK light client integrations
+   - Currently planned implementations:
+     - Ethereum: [Spectre-RAD](https://github.com/jonas089/spectre-rad)
+     - Cosmos ICS23: [TendermintX](https://github.com/succinctlabs/tendermintx)
+
+3. **Circuit Integration**
+   - Implement proof verification logic in the coprocessor circuit
+   - Verify ZK light client proofs against previous chain states
+
+Once these steps are completed, Valence ZK will be production-ready for:
+- Ethereum and Cosmos ICS23 (Tendermint) chains
+- Additional Tendermint chains can be added with their own contract and TendermintX prover instance
+
 ## Development Roadmap
 
-- Support alternative environments (Solana)
-- Integration of zk light client roots
-- Enhanced serialization and type system abstractions
-- Performance optimizations
-- Deployments and Blockops
-- Support for receipt proofs (ERC20 events)
-- Support for Layer 2 EVM networks (Optimism, Arbitrum)
+- [ ] Deploy coprocessor state contract with genesis state
+- [ ] Implement ZK light client interfaces for Ethereum and Neutron
+- [ ] Integrate ZK light client proof verification in coprocessor circuit
+- [ ] Support alternative environments (Solana)
+- [ ] Enhanced serialization and type system abstractions
+- [ ] Performance optimizations
+- [ ] Deployments and Blockops
+- [ ] Support for receipt proofs (ERC20 events)
+- [ ] Support for Layer 2 EVM networks (Optimism, Arbitrum)
 
 
 > [!NOTE]
