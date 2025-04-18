@@ -1,8 +1,31 @@
-use std::str::FromStr;
+/* Zero Knowledge Light Client integrations for supported domains
+In order for valence-zk to be fully secure, we need to be able to verify that the roots we are using in the coprocessor circuit are actually
+valid roots for the domains at the given heights.
+
+This can be achieved by requesting zero knowledge light client proofs at the respective heights and verifying them in the coprocessor circuit.
+The verification logic for those will depend on the specific light client impelementation, but for Ethereum and Ics23 Cosmos chains we can
+use existing SP1 implementations.
+
+See an Ethereum ZK light client here:
+https://github.com/jonas089/spectre-rad
+
+See an Ics23 Cosmos ZK light client here:
+https://github.com/succinctlabs/tendermintx
+
+To get this zk-valence demo to production, we are required to:
+- Deploy a coprocessor state contract, which is ONCE initialized with the genesis state that we choose for Ethereum and Neutron e.g. roots for Height E and Height N.
+- Implement the light client interface located in this filefor these zk light clients and remove the "Mock" prefix.
+- Implement the proof verification logic in the coprocessor circuit for these zk light clients.
+
+DONE! At this point we are ready to ship valence-zk in production on Ethereum and Cosmos Ics23 (tendermint)chains.
+Initially we will want to deploy tendermintx for Neutron, but each additional tendermint chain will only require its own contract
+and instance of the tendermintx prover.
+*/
 
 use alloy;
 use alloy::providers::{Provider, ProviderBuilder};
 use base64::Engine;
+use std::str::FromStr;
 use tendermint_rpc::{Client, Url as TendermintUrl};
 
 /// Trait defining the interface for interacting with a Neutron light client
