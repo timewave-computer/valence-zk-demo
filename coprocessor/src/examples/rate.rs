@@ -1,51 +1,39 @@
-use std::{env, str::FromStr};
+use std::env;
 
 use crate::{
     RATE_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
     examples::prove_coprocessor,
-    get_ethereum_height, get_latest_neutron_app_hash_and_height,
-    read_ethereum_default_account_address, read_ethereum_rpc_url,
-    read_neutron_default_account_address,
+    lightclients::{
+        MockEthereumLightClientInterface, MockLightClient, MockNeutronLightClientInterface,
+    },
+    read_ethereum_default_account_address, read_neutron_default_account_address,
 };
 use alloy::{
     hex::{self, FromHex},
-    providers::{Provider, ProviderBuilder},
     sol_types::SolValue,
 };
 use alloy_primitives::U256;
-use base64::Engine;
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
-use url::Url;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
-pub async fn prove() {
-    let (neutron_root, neutron_height) = get_latest_neutron_app_hash_and_height().await;
+pub async fn prove(mock_light_client: MockLightClient) {
+    let (neutron_root, neutron_height) =
+        mock_light_client.get_latest_neutron_root_and_height().await;
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
         b"balances",
         &read_neutron_default_account_address(),
         &read_neutron_vault_example_contract_address(),
     );
-    let neutron_root = base64::engine::general_purpose::STANDARD
-        .decode(neutron_root)
-        .unwrap();
     let neutron_vault_shares_key =
         Ics23Key::new_wasm_stored_value("shares", &read_neutron_vault_example_contract_address());
-    // required ethereum storage key(s)
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&read_ethereum_rpc_url()).unwrap());
-    let ethereum_height = get_ethereum_height().await;
-    let ethereum_root = provider
-        .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(ethereum_height))
-        .await
-        .unwrap()
-        .unwrap()
-        .header
-        .state_root
-        .to_vec();
+    let (ethereum_root, ethereum_height) = mock_light_client
+        .get_latest_ethereum_root_and_height()
+        .await;
     let address =
         alloy_primitives::Address::from_hex(read_ethereum_default_account_address()).unwrap();
     let slot: U256 = alloy_primitives::U256::from(0);

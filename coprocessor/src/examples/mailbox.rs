@@ -2,31 +2,26 @@ use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
     examples::prove_coprocessor,
-    get_ethereum_height, get_latest_neutron_app_hash_and_height, read_ethereum_rpc_url,
+    lightclients::{
+        MockEthereumLightClientInterface, MockLightClient, MockNeutronLightClientInterface,
+    },
 };
-use alloy::{
-    providers::{Provider, ProviderBuilder},
-    sol_types::SolValue,
-};
+use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
-use base64::Engine;
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
-use std::{env, str::FromStr};
-use url::Url;
+use std::env;
 use zk_mailbox_application_types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
 };
 
-pub async fn prove() {
+pub async fn prove(mock_light_client: MockLightClient) {
     // required neutron storage key(s)
-    let (neutron_root, neutron_height) = get_latest_neutron_app_hash_and_height().await;
-    let neutron_root = base64::engine::general_purpose::STANDARD
-        .decode(neutron_root)
-        .unwrap();
+    let (neutron_root, neutron_height) =
+        mock_light_client.get_latest_neutron_root_and_height().await;
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
         b"messages",
         "1",
@@ -34,16 +29,9 @@ pub async fn prove() {
     );
 
     // required ethereum storage key(s)
-    let ethereum_height = get_ethereum_height().await;
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&read_ethereum_rpc_url()).unwrap());
-    let ethereum_root = provider
-        .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(ethereum_height))
-        .await
-        .unwrap()
-        .unwrap()
-        .header
-        .state_root
-        .to_vec();
+    let (ethereum_root, ethereum_height) = mock_light_client
+        .get_latest_ethereum_root_and_height()
+        .await;
     let slot: U256 = alloy_primitives::U256::from(0);
     let counter = U256::from(1);
     let encoded_key = (counter, slot).abi_encode();
