@@ -5,7 +5,7 @@ use valence_smt::SmtOpening;
 /// Inputs for the coprocessor circuit that contains merkle proofs from different domains
 /// and their corresponding roots for verification.
 #[derive(Debug, Clone, borsh::BorshSerialize, borsh::BorshDeserialize)]
-pub struct MerkleProofInputs {
+pub struct CoprocessorCircuitInputs {
     /// Vector of Ethereum merkle proofs, each containing:
     /// - Account proof
     /// - Storage proof
@@ -29,7 +29,7 @@ pub struct MerkleProofInputs {
 
 /// Outputs from the coprocessor circuit containing the verified roots
 #[derive(Debug, Clone, borsh::BorshSerialize, borsh::BorshDeserialize)]
-pub struct MerkleProofOutputs {
+pub struct CoprocessorCircuitOutputs {
     /// The verified Neutron root hash
     pub neutron_root: Vec<u8>,
     /// The verified Ethereum root hash

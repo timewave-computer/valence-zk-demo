@@ -1,9 +1,9 @@
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
-use types::{MerkleProofInputs, MerkleProofOutputs};
+use types::{CoprocessorCircuitInputs, CoprocessorCircuitOutputs};
 use valence_smt::MemorySmt;
 
 // todo: factor the logic from coprocessor-circuit-sp1 into this file
-pub fn coprocessor_logic(inputs: MerkleProofInputs) -> Vec<u8> {
+pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> Vec<u8> {
     assert!(MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root,
@@ -33,7 +33,7 @@ pub fn coprocessor_logic(inputs: MerkleProofInputs) -> Vec<u8> {
             .verify(&inputs.neutron_root)
             .expect("Failed to verify Neutron storage proof");
     }
-    borsh::to_vec(&MerkleProofOutputs {
+    borsh::to_vec(&CoprocessorCircuitOutputs {
         neutron_root: inputs.neutron_root,
         ethereum_root: inputs.ethereum_root,
         coprocessor_root: inputs.coprocessor_root,

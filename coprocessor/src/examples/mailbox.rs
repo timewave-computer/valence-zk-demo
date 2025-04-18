@@ -1,6 +1,7 @@
 use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
+    examples::prove_coprocessor,
     get_ethereum_height, get_latest_neutron_app_hash_and_height, read_ethereum_rpc_url,
 };
 use alloy::{
@@ -9,7 +10,6 @@ use alloy::{
 };
 use alloy_primitives::U256;
 use base64::Engine;
-use coprocessor_circuit_types::MerkleProofOutputs as CoprocessorCircuitOutputs;
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
@@ -60,50 +60,13 @@ pub async fn prove() {
         .get_storage_merkle_proofs(neutron_height, ethereum_height)
         .await;
 
-    #[cfg(feature = "coprocessor")]
-    {
-        let proof = coprocessor
-            .prove_progression(
-                merkle_proofs.0.clone(),
-                merkle_proofs.1.clone(),
-                ethereum_root,
-                neutron_root,
-            )
-            .await;
-        let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
-        Groth16Verifier::verify(
-            &proof.0.bytes(),
-            &proof.0.public_values.to_vec(),
-            &proof.1.bytes32(),
-            groth16_vk,
-        )
-        .unwrap();
-        let coprocessor_circuit_outputs: CoprocessorCircuitOutputs =
-            borsh::from_slice(proof.0.public_values.as_slice()).unwrap();
-        println!(
-            "Coprocessor Circuit Outputs: {:?}",
-            coprocessor_circuit_outputs
-        );
-    }
-    #[cfg(not(feature = "coprocessor"))]
-    {
-        for proof in merkle_proofs.0.clone() {
-            coprocessor.smt_root = coprocessor
-                .smt_tree
-                .insert(coprocessor.smt_root, "demo", borsh::to_vec(&proof).unwrap())
-                .unwrap();
-        }
-        for proof in merkle_proofs.1.clone() {
-            coprocessor.smt_root = coprocessor
-                .smt_tree
-                .insert(
-                    coprocessor.smt_root,
-                    "demo",
-                    borsh::to_vec(&proof.1).unwrap(),
-                )
-                .unwrap();
-        }
-    }
+    prove_coprocessor(
+        &mut coprocessor,
+        merkle_proofs.clone(),
+        ethereum_root,
+        neutron_root,
+    )
+    .await;
 
     // get the SMT openings that will be part of the input for our example application
     let ethereum_message_smt_opening = coprocessor

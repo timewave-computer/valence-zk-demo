@@ -10,7 +10,7 @@ use valence_smt::{MemorySmt, SmtOpening};
 
 use crate::{COPROCESSOR_CIRCUIT_ELF, read_ethereum_rpc_url, read_neutron_rpc_url};
 use common_merkle_proofs::merkle::types::MerkleClient;
-use coprocessor_circuit_types::MerkleProofInputs as CoprocessorCircuitInputs;
+use coprocessor_circuit_types::CoprocessorCircuitInputs;
 
 /// A type alias for Ethereum storage keys represented as byte vectors
 pub type EthereumKey = Vec<u8>;

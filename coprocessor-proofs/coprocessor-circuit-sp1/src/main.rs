@@ -6,10 +6,10 @@
 #![no_main]
 use borsh;
 use coprocessor_circuit_logic::coprocessor_logic;
-use types::MerkleProofInputs;
+use types::CoprocessorCircuitInputs;
 sp1_zkvm::entrypoint!(main);
 pub fn main() {
-    let inputs: MerkleProofInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
+    let inputs: CoprocessorCircuitInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MerkleProofInputs");
 
     let circuit_outputs = coprocessor_logic(inputs);
