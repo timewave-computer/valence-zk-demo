@@ -4,9 +4,7 @@ use crate::{
     RATE_APPLICATION_CIRCUIT_ELF,
     coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
     examples::prove_coprocessor,
-    lightclients::{
-        MockEthereumLightClientInterface, MockLightClient, MockNeutronLightClientInterface,
-    },
+    lightclients::{MockLightClient, MockLightClientInterface},
     read_ethereum_default_account_address, read_neutron_default_account_address,
 };
 use alloy::{
@@ -22,8 +20,10 @@ use sp1_verifier::Groth16Verifier;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
 pub async fn prove(mock_light_client: MockLightClient) {
-    let (neutron_root, neutron_height) =
-        mock_light_client.get_latest_neutron_root_and_height().await;
+    let (neutron_root, neutron_height) = mock_light_client
+        .neutron_light_client
+        .get_latest_root_and_height()
+        .await;
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
         b"balances",
         &read_neutron_default_account_address(),
@@ -32,7 +32,8 @@ pub async fn prove(mock_light_client: MockLightClient) {
     let neutron_vault_shares_key =
         Ics23Key::new_wasm_stored_value("shares", &read_neutron_vault_example_contract_address());
     let (ethereum_root, ethereum_height) = mock_light_client
-        .get_latest_ethereum_root_and_height()
+        .ethereum_light_client
+        .get_latest_root_and_height()
         .await;
     let address =
         alloy_primitives::Address::from_hex(read_ethereum_default_account_address()).unwrap();
