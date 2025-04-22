@@ -8,9 +8,9 @@ use valence_smt::SmtOpening;
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct MailboxApplicationCircuitInputs {
     /// SMT opening for the Neutron vault balance proof
-    pub neutron_messages_openings: Vec<SmtOpening>,
+    pub neutron_message_openings: Vec<SmtOpening>,
     /// SMT opening for the Neutron vault shares proof
-    pub ethereum_messages_openings: Vec<SmtOpening>,
+    pub ethereum_message_openings: Vec<SmtOpening>,
     /// Root of the coprocessor SMT tree
     pub coprocessor_root: [u8; 32],
 }

@@ -70,8 +70,8 @@ pub async fn prove(mock_light_client: MockLightClient) {
     );
     // call the example application circuit with all the inputs
     let mailbox_application_circuit_inputs = MailboxApplicationCircuitInputs {
-        neutron_messages_openings: vec![neutron_message_smt_opening],
-        ethereum_messages_openings: vec![ethereum_message_smt_opening],
+        neutron_message_openings: vec![neutron_message_smt_opening],
+        ethereum_message_openings: vec![ethereum_message_smt_opening],
         coprocessor_root: coprocessor.smt_root,
     };
     let client = ProverClient::from_env();

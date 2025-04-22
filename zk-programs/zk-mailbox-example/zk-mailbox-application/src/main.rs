@@ -11,7 +11,7 @@ fn main() {
     let inputs: MailboxApplicationCircuitInputs = borsh::from_slice(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MailboxApplicationCircuitInputs");
     let mut messages: Vec<String> = Vec::new();
-    for ethereum_proof in inputs.ethereum_messages_openings {
+    for ethereum_proof in inputs.ethereum_message_openings {
         assert!(MemorySmt::verify(
             "demo",
             &inputs.coprocessor_root.try_into().unwrap(),
@@ -19,7 +19,7 @@ fn main() {
         ));
         messages.push(deserialize_ethereum_proof_value_as_string(ethereum_proof));
     }
-    for neutron_proof in inputs.neutron_messages_openings {
+    for neutron_proof in inputs.neutron_message_openings {
         assert!(MemorySmt::verify(
             "demo",
             &inputs.coprocessor_root.try_into().unwrap(),
