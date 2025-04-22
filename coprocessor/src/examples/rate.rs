@@ -2,7 +2,7 @@ use std::env;
 
 use crate::{
     RATE_APPLICATION_CIRCUIT_ELF,
-    coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
+    coprocessor::{Coprocessor, CoprocessorInterface},
     examples::prove_coprocessor,
     lightclients::{MockLightClient, MockLightClientInterface},
     read_ethereum_default_account_address, read_neutron_default_account_address,
@@ -65,14 +65,26 @@ pub async fn prove(mock_light_client: MockLightClient) {
     .await;
 
     // get the SMT openings that will be part of the input for our example application
-    let neutron_balance_smt_opening =
-        coprocessor.get_neutron_opening(&borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap());
-    let neutron_shares_smt_opening =
-        coprocessor.get_neutron_opening(&borsh::to_vec(&merkle_proofs.0.last().unwrap()).unwrap());
-    let ethereum_balance_smt_opening = coprocessor
-        .get_ethereum_opening(&borsh::to_vec(&merkle_proofs.1.first().unwrap().1).unwrap());
-    let ethereum_shares_smt_opening = coprocessor
-        .get_ethereum_opening(&borsh::to_vec(&merkle_proofs.1.last().unwrap().1).unwrap());
+    let neutron_balance_smt_opening = coprocessor.neutron_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
+    let neutron_shares_smt_opening = coprocessor.neutron_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.0.last().unwrap()).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
+    let ethereum_balance_smt_opening = coprocessor.ethereum_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.1.first().unwrap().1).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
+    let ethereum_shares_smt_opening = coprocessor.ethereum_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.1.last().unwrap().1).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
 
     // call the example application circuit with all the inputs
     let rate_application_circuit_inputs = RateApplicationCircuitInputs {

@@ -1,6 +1,6 @@
 use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
-    coprocessor::{Coprocessor, EthereumCoprocessor, NeutronCoprocessor},
+    coprocessor::{Coprocessor, CoprocessorInterface},
     examples::prove_coprocessor,
     lightclients::{MockLightClient, MockLightClientInterface},
 };
@@ -58,10 +58,16 @@ pub async fn prove(mock_light_client: MockLightClient) {
     .await;
 
     // get the SMT openings that will be part of the input for our example application
-    let ethereum_message_smt_opening = coprocessor
-        .get_ethereum_opening(&borsh::to_vec(&merkle_proofs.1.first().unwrap().1).unwrap());
-    let neutron_message_smt_opening =
-        coprocessor.get_neutron_opening(&borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap());
+    let ethereum_message_smt_opening = coprocessor.ethereum_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.1.first().unwrap().1).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
+    let neutron_message_smt_opening = coprocessor.neutron_coprocessor.get_smt_opening(
+        &borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap(),
+        &coprocessor.smt_tree,
+        coprocessor.smt_root,
+    );
     // call the example application circuit with all the inputs
     let mailbox_application_circuit_inputs = MailboxApplicationCircuitInputs {
         neutron_messages_openings: vec![neutron_message_smt_opening],
