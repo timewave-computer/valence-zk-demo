@@ -8,6 +8,7 @@ name = "coprocessor"
 path = "src/main.rs"
 
 [dependencies]
+#tendermintx.workspace = true
 hex = "0.4"
 tendermint-rpc = { version = "0.38.1", features = ["http-client"] }
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
@@ -27,6 +28,7 @@ alloy = { version = "0.12.5", features = ["full"] }
 alloy-primitives.workspace = true
 url = "2.5.4"
 base64 = "0.22.1"
+serde_cbor = "0.11.2"
 serde_json.workspace = true
 valence-coprocessor-core.workspace = true
 valence-smt.workspace = true
@@ -39,6 +41,16 @@ zk-mailbox-application.workspace = true
 zk-mailbox-application-types.workspace = true
 sp1-sdk.workspace = true
 sp1-verifier.workspace = true
+
+anyhow.workspace = true
+
+helios-program = { package = "sp1-helios-program", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
+helios-operator = { package = "sp1-helios-script", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
+helios-consensus-core = { git = "https://github.com/a16z/helios", tag = "0.8.6" }
+helios-ethereum = { git = "https://github.com/a16z/helios", tag = "0.8.6" }
+sp1-helios-primitives = { package = "sp1-helios-primitives", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
+tendermint-program = { package = "tendermint-program", git = "https://github.com/timewave-computer/sp1-tendermint", branch = "valence-compat" }
+tendermint-operator = { package = "tendermint-operator", git = "https://github.com/timewave-computer/sp1-tendermint", branch = "valence-compat" }
 
 [build-dependencies]
 sp1-build = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }

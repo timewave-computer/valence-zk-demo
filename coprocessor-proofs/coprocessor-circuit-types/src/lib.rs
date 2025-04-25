@@ -34,5 +34,10 @@ pub struct CoprocessorCircuitOutputs {
     pub neutron_root: Vec<u8>,
     /// The verified Ethereum root hash
     pub ethereum_root: Vec<u8>,
+    /// The verified ethereum keys
+    pub ethereum_keys: Vec<Vec<u8>>,
+    /// The verified neutron keys
+    pub neutron_keys: Vec<String>,
+    /// The coprocessor root hash
     pub coprocessor_root: [u8; 32],
 }

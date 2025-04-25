@@ -4,6 +4,7 @@ use examples::mailbox;
 #[cfg(feature = "rate")]
 use examples::rate;
 mod coprocessor;
+mod demo;
 mod lightclients;
 use lightclients::{MockEthereumLightClient, MockLightClient, MockNeutronLightClient};
 use sp1_sdk::include_elf;

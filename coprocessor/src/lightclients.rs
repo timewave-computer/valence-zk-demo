@@ -25,7 +25,6 @@ use alloy::providers::{Provider, ProviderBuilder};
 use base64::Engine;
 use std::str::FromStr;
 use tendermint_rpc::{Client, Url as TendermintUrl};
-
 /// Trait defining the interface for light client implementations.
 ///
 /// This trait provides a common interface for retrieving the latest state root
