@@ -44,7 +44,10 @@ async fn main() {
     // initialize the trusted root for neutron
     coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
     // compute the coprocessor update
-    prove_coprocessor(&mut coprocessor).await;
+    let outputs = prove_coprocessor(&mut coprocessor).await;
+    // take the new ethereum state root
+    // take the new tendermint state root
+    // pass these roots to the application circuit and prove the openings against them
 }
 
 /// Reads the Neutron RPC URL from environment variables

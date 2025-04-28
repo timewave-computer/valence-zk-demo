@@ -8,6 +8,10 @@ pub struct CoprocessorCircuitInputs {
     pub tendermint_proof: Vec<u8>,
     pub tendermint_public_values: Vec<u8>,
     pub tendermint_vk: String,
+    pub previous_neutron_height: u64,
+    pub previous_ethereum_height: u64,
+    pub previous_neutron_root: Vec<u8>,
+    pub previous_ethereum_root: Vec<u8>,
 }
 
 /// Outputs from the coprocessor circuit containing the verified roots

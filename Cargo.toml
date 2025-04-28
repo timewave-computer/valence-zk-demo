@@ -28,6 +28,7 @@ coprocessor-circuit-sp1 = { path = "coprocessor-proofs/coprocessor-circuit-sp1" 
 coprocessor-circuit-types = { path = "coprocessor-proofs/coprocessor-circuit-types" }
 valence-coprocessor-core = { package = "valence-coprocessor", git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros" }
 alloy-primitives = { version = "0.8.25", features = ["rlp"] }
+alloy-sol-types = "0.7"
 
 common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [

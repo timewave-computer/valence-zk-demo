@@ -1,11 +1,10 @@
-use alloy::dyn_abi::SolType;
 use anyhow::Result;
 use helios_consensus_core::consensus_spec::MainnetConsensusSpec;
 use helios_ethereum::consensus::Inner;
 use helios_ethereum::rpc::ConsensusRpc;
 use helios_ethereum::rpc::http_rpc::HttpRpc;
 use helios_operator::{get_checkpoint, get_client, get_updates};
-use sp1_helios_primitives::types::{ProofInputs, ProofOutputs};
+use sp1_helios_primitives::types::ProofInputs;
 use sp1_sdk::{
     EnvProver, HashableKey, ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin,
     SP1VerifyingKey,
@@ -53,8 +52,6 @@ impl SP1HeliosOperator {
         stdin.write_slice(&encoded_proof_inputs);
         // Generate proof.
         let proof = self.client.prove(&self.pk, &stdin).groth16().run()?;
-        let outputs = ProofOutputs::abi_decode(proof.public_values.as_slice(), false).unwrap();
-        println!("Proof outputs: {:?}", outputs);
         Ok(Some(proof))
     }
 

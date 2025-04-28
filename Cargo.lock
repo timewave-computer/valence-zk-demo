@@ -2502,6 +2502,7 @@ version = "0.1.0"
 dependencies = [
  "alloy 0.12.6",
  "alloy-primitives 0.8.25",
+ "alloy-sol-types 0.7.7",
  "anyhow",
  "base64 0.22.1",
  "borsh",
@@ -2539,6 +2540,7 @@ dependencies = [
 name = "coprocessor-circuit-logic"
 version = "0.1.0"
 dependencies = [
+ "alloy-sol-types 0.7.7",
  "borsh",
  "common",
  "coprocessor-circuit-types",
