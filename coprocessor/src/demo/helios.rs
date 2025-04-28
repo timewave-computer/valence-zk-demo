@@ -91,15 +91,13 @@ impl SP1HeliosOperator {
 
 #[cfg(test)]
 mod test {
+    use super::SP1HeliosOperator;
     use std::time::Instant;
 
-    use super::SP1HeliosOperator;
-
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
     async fn test_helios_prover() {
         let start_time = Instant::now();
         dotenvy::dotenv().ok();
-
         let mut operator = SP1HeliosOperator::new().await;
         operator.run().await;
         let end_time = Instant::now();

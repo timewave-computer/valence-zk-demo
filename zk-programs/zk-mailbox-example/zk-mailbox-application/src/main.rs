@@ -4,7 +4,7 @@ use types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
     deserialize_ethereum_proof_value_as_string, deserialize_neutron_proof_value_as_string,
 };
-use valence_smt::MemorySmt;
+use valence_coprocessor_core::MemorySmt;
 
 sp1_zkvm::entrypoint!(main);
 fn main() {

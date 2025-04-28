@@ -2,7 +2,7 @@ use alloy_primitives::U256;
 use borsh::{BorshDeserialize, BorshSerialize};
 use ethereum_merkle_proofs::merkle_lib::types::EthereumMerkleProof;
 use ics23_merkle_proofs::merkle_lib::types::Ics23MerkleProof;
-use valence_smt::SmtOpening;
+use valence_coprocessor_core::SmtOpening;
 
 /// Inputs for the rate application circuit that contains all necessary merkle proofs
 /// and SMT openings for verifying vault balances and shares across different domains.

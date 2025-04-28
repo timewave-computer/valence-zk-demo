@@ -4,7 +4,7 @@ use types::{
     RateApplicationCircuitInputs, RateApplicationCircuitOutputs,
     deserialize_ethereum_proof_value_as_u256, deserialize_neutron_proof_value_as_u256,
 };
-use valence_smt::MemorySmt;
+use valence_coprocessor_core::MemorySmt;
 
 sp1_zkvm::entrypoint!(main);
 fn main() {

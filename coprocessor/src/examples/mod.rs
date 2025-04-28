@@ -52,7 +52,12 @@ pub async fn prove_coprocessor(
         for proof in merkle_proofs.0.clone() {
             coprocessor.smt_root = coprocessor
                 .smt_tree
-                .insert(coprocessor.smt_root, "demo", borsh::to_vec(&proof).unwrap())
+                .insert(
+                    coprocessor.smt_root,
+                    "demo",
+                    &borsh::to_vec(&proof).unwrap(),
+                    borsh::to_vec(&proof).unwrap(),
+                )
                 .unwrap();
         }
         for proof in merkle_proofs.1.clone() {
@@ -61,6 +66,7 @@ pub async fn prove_coprocessor(
                 .insert(
                     coprocessor.smt_root,
                     "demo",
+                    &borsh::to_vec(&proof.1).unwrap(),
                     borsh::to_vec(&proof.1).unwrap(),
                 )
                 .unwrap();

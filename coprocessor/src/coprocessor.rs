@@ -6,7 +6,7 @@ use ics23_merkle_proofs::{
     keys::Ics23Key, merkle_lib::types::Ics23MerkleProof, rpc::Ics23MerkleRpcClient,
 };
 use sp1_sdk::{ProverClient, SP1Stdin};
-use valence_smt::{MemorySmt, SmtOpening};
+use valence_coprocessor_core::{MemorySmt, SmtOpening};
 
 use crate::{COPROCESSOR_CIRCUIT_ELF, read_ethereum_rpc_url, read_neutron_rpc_url};
 use common_merkle_proofs::merkle::types::MerkleClient;
@@ -222,19 +222,34 @@ impl Coprocessor {
         for proof in neutron_merkle_proofs.clone() {
             self.smt_root = self
                 .smt_tree
-                .insert(self.smt_root, "demo", borsh::to_vec(&proof).unwrap())
+                .insert(
+                    self.smt_root,
+                    "demo",
+                    &borsh::to_vec(&proof).unwrap(),
+                    borsh::to_vec(&proof).unwrap(),
+                )
                 .unwrap();
         }
         for proof in ethereum_merkle_proofs.clone() {
             self.smt_root = self
                 .smt_tree
-                .insert(self.smt_root, "demo", borsh::to_vec(&proof.1).unwrap())
+                .insert(
+                    self.smt_root,
+                    "demo",
+                    &borsh::to_vec(&proof.1).unwrap(),
+                    borsh::to_vec(&proof.1).unwrap(),
+                )
                 .unwrap();
         }
 
         self.smt_root = self
             .smt_tree
-            .insert(self.smt_root, "demo", borsh::to_vec(&neutron_root).unwrap())
+            .insert(
+                self.smt_root,
+                "demo",
+                &borsh::to_vec(&neutron_root).unwrap(),
+                borsh::to_vec(&neutron_root).unwrap(),
+            )
             .unwrap();
 
         self.smt_root = self
@@ -242,6 +257,7 @@ impl Coprocessor {
             .insert(
                 self.smt_root,
                 "demo",
+                &borsh::to_vec(&ethereum_root).unwrap(),
                 borsh::to_vec(&ethereum_root).unwrap(),
             )
             .unwrap();

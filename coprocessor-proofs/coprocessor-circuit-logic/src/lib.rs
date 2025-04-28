@@ -1,6 +1,6 @@
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
 use types::{CoprocessorCircuitInputs, CoprocessorCircuitOutputs};
-use valence_smt::MemorySmt;
+use valence_coprocessor_core::MemorySmt;
 
 // todo: factor the logic from coprocessor-circuit-sp1 into this file
 pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> Vec<u8> {

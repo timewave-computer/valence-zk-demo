@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 borsh.workspace = true
 valence-coprocessor-core.workspace = true
-valence-smt.workspace = true
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
     "borsh",
     "serde",
