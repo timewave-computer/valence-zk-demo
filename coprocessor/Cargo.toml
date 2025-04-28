@@ -49,6 +49,7 @@ helios-consensus-core = { git = "https://github.com/a16z/helios", tag = "0.8.6" 
 helios-ethereum = { git = "https://github.com/a16z/helios", tag = "0.8.6" }
 sp1-helios-primitives = { package = "sp1-helios-primitives", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
 tendermint-program = { package = "tendermint-program", git = "https://github.com/timewave-computer/sp1-tendermint", branch = "valence-compat" }
+tendermint-program-types = {package="program-types", git = "https://github.com/timewave-computer/sp1-tendermint", branch = "valence-compat" }
 tendermint-operator = { package = "tendermint-operator", git = "https://github.com/timewave-computer/sp1-tendermint", branch = "valence-compat" }
 
 [build-dependencies]

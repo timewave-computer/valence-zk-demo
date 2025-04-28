@@ -2514,6 +2514,7 @@ dependencies = [
  "helios-ethereum",
  "hex",
  "ics23-cosmos",
+ "program-types",
  "serde_cbor",
  "serde_json",
  "sp1-build",
