@@ -5,7 +5,7 @@ use examples::mailbox;
 use examples::rate;
 mod clients;
 mod coprocessor;
-mod demo;
+mod lightclients;
 use clients::{DefaultClient, EthereumClient, NeutronClient};
 use sp1_sdk::include_elf;
 use std::{env, time::Instant};

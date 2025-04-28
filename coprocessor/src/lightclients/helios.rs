@@ -26,23 +26,26 @@ use helios_ethereum::rpc::ConsensusRpc;
 use helios_ethereum::rpc::http_rpc::HttpRpc;
 use helios_operator::{get_checkpoint, get_client, get_updates};
 use sp1_helios_primitives::types::{ProofInputs, ProofOutputs};
-use sp1_sdk::{EnvProver, ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin};
+use sp1_sdk::{
+    EnvProver, ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey,
+};
 
-const ELF: &[u8] = include_bytes!("../../../elfs/sp1-helios-elf");
+pub const ELF: &[u8] = include_bytes!("../../../elfs/sp1-helios-elf");
 
-struct SP1HeliosOperator {
-    client: EnvProver,
-    pk: SP1ProvingKey,
+pub struct SP1HeliosOperator {
+    pub client: EnvProver,
+    pub pk: SP1ProvingKey,
+    pub vk: SP1VerifyingKey,
 }
 
 impl SP1HeliosOperator {
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         dotenvy::dotenv().ok();
 
         let client = ProverClient::from_env();
-        let (pk, _) = client.setup(ELF);
+        let (pk, vk) = client.setup(ELF);
 
-        Self { client, pk }
+        Self { client, pk, vk }
     }
 
     /// Fetch values and generate an 'update' proof for the SP1 Helios contract.
@@ -77,20 +80,22 @@ impl SP1HeliosOperator {
     }
 
     /// Start the operator.
-    async fn run(&mut self) {
-        // slot multiple of 8192
-        let slot: u64 = 11558912;
+    pub async fn run(&mut self, slot: u64) -> Result<Option<SP1ProofWithPublicValues>> {
+        let slot: u64 = slot;
         let checkpoint = get_checkpoint(slot).await.unwrap();
         // Get the client from the checkpoint
         let client = get_client(checkpoint).await.unwrap();
 
         // Request an update
-        self.request_update(client).await.unwrap();
+        self.request_update(client).await
     }
 }
 
 #[cfg(test)]
 mod test {
+    use sp1_sdk::HashableKey;
+    use sp1_verifier::Groth16Verifier;
+
     use super::SP1HeliosOperator;
     use std::time::Instant;
 
@@ -98,8 +103,24 @@ mod test {
     async fn test_helios_prover() {
         let start_time = Instant::now();
         dotenvy::dotenv().ok();
-        let mut operator = SP1HeliosOperator::new().await;
-        operator.run().await;
+        let mut operator = SP1HeliosOperator::new();
+        // for testing we hardcode the latest finalized slot from /eth/v1/beacon/states/finalized/finality_checkpoints
+        let proof = operator
+            .run(234644 * 32)
+            .await
+            .expect("Failed to prove!")
+            .unwrap();
+
+        // verify the light client proof
+        let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
+        Groth16Verifier::verify(
+            &proof.bytes(),
+            &proof.public_values.to_vec(),
+            &operator.vk.bytes32(),
+            groth16_vk,
+        )
+        .unwrap();
+
         let end_time = Instant::now();
         println!("Time taken: {:?}", end_time.duration_since(start_time));
     }

@@ -6146,7 +6146,7 @@ dependencies = [
 [[package]]
 name = "program-types"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#0f23c171ddf034300c93fa1b07b73af5ae142bab"
+source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#a4faae47a9a927a38d57e23f36c5152d48c8b27f"
 dependencies = [
  "serde",
 ]
@@ -8602,7 +8602,7 @@ dependencies = [
 [[package]]
 name = "tendermint-operator"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#0f23c171ddf034300c93fa1b07b73af5ae142bab"
+source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#a4faae47a9a927a38d57e23f36c5152d48c8b27f"
 dependencies = [
  "alloy-primitives 0.7.7",
  "alloy-sol-types 0.7.7",
@@ -8631,7 +8631,7 @@ dependencies = [
 [[package]]
 name = "tendermint-program"
 version = "0.1.0"
-source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#0f23c171ddf034300c93fa1b07b73af5ae142bab"
+source = "git+https://github.com/timewave-computer/sp1-tendermint?branch=valence-compat#a4faae47a9a927a38d57e23f36c5152d48c8b27f"
 dependencies = [
  "program-types",
  "serde",
