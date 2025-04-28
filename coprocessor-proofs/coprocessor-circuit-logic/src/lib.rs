@@ -1,20 +1,28 @@
 use alloy_sol_types::{SolType, sol};
 use sp1_verifier::Groth16Verifier;
 use types::CoprocessorCircuitInputs;
+use valence_coprocessor_core::MemorySmt;
 
 // todo: factor the logic from coprocessor-circuit-sp1 into this file
-pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> Vec<u8> {
+pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
     let tendermint_output: TendermintOutput =
         TendermintOutput::abi_decode(&inputs.tendermint_public_values, false).unwrap();
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&inputs.helios_public_values, false).unwrap();
 
     // these are the targets that we want to insert and commit
-    /*let target_tendermint_root = tendermint_output.targetHeaderHash.to_vec();
-    let target_ethereum_root = helios_output.newHeader.to_vec();
     let target_tendermint_height = tendermint_output.targetHeight;
-    let target_ethereum_height = helios_output.newHead;*/
+    let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
+    let target_tendermint_root = tendermint_output.targetHeaderHash.to_vec();
+    let target_ethereum_root = helios_output.newHeader.to_vec();
     // verify the smt inserts of these targets
+
+    let openings = inputs.openings;
+
+    for (idx, opening) in openings.into_iter().enumerate() {
+        MemorySmt::verify("demo", &inputs.coprocessor_root, &opening);
+        // todo: assert that the values actually match the targets above
+    }
 
     // todo assert the inputs that we expect to match
     // previous roots must match and previous heights must be less than current heights
@@ -37,7 +45,7 @@ pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> Vec<u8> {
     )
     .expect("Failed to verify helios zk light client update");
     // todo: commit the new SMT root after inserting the new roots at the target values
-    vec![]
+    inputs.coprocessor_root
 }
 
 sol! {

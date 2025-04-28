@@ -7,6 +7,7 @@ use coprocessor_circuit_types::CoprocessorCircuitInputs;
 use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
+use valence_coprocessor_core::SmtOpening;
 
 use crate::{
     COPROCESSOR_CIRCUIT_ELF,
@@ -92,7 +93,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             coprocessor_root,
             "demo",
             &tendermint_root_key,
-            target_tendermint_root,
+            target_tendermint_root.clone(),
         )
         .expect("Failed to insert Ethereum Root");
 
@@ -102,9 +103,44 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             coprocessor_root,
             "demo",
             &ethereum_root_key,
-            target_ethereum_root,
+            target_ethereum_root.clone(),
         )
         .expect("Failed to insert Ethereum Root");
+
+    let mut openings: Vec<SmtOpening> = vec![];
+    let tendermint_height_opening = coprocessor
+        .smt_tree
+        .get_opening(
+            "demo",
+            coprocessor_root,
+            &target_tendermint_height.to_be_bytes(),
+        )
+        .unwrap()
+        .unwrap();
+    let ethereum_height_opening = coprocessor
+        .smt_tree
+        .get_opening(
+            "demo",
+            coprocessor_root,
+            &target_ethereum_height.to_be_bytes(),
+        )
+        .unwrap()
+        .unwrap();
+    let tendermint_root_opening = coprocessor
+        .smt_tree
+        .get_opening("demo", coprocessor_root, &target_tendermint_root)
+        .unwrap()
+        .unwrap();
+    let ethereum_root_opening = coprocessor
+        .smt_tree
+        .get_opening("demo", coprocessor_root, &target_ethereum_root)
+        .unwrap()
+        .unwrap();
+
+    openings.push(tendermint_height_opening);
+    openings.push(ethereum_height_opening);
+    openings.push(tendermint_root_opening);
+    openings.push(ethereum_root_opening);
 
     let coprocessor_inputs = CoprocessorCircuitInputs {
         helios_proof: helios_proof_serialized,
@@ -117,6 +153,8 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         previous_ethereum_height: coprocessor.trusted_ethereum_height,
         previous_neutron_root: coprocessor.trusted_neutron_root.to_vec(),
         previous_ethereum_root: coprocessor.trusted_ethereum_root.to_vec(),
+        openings,
+        coprocessor_root,
     };
 
     let coprocessor_circuit_inputs_serialized = borsh::to_vec(&coprocessor_inputs).unwrap();
