@@ -1,8 +1,8 @@
 use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
+    clients::{ClientInterface, DefaultClient},
     coprocessor::{Coprocessor, CoprocessorInterface},
     examples::prove_coprocessor,
-    lightclients::{MockLightClient, MockLightClientInterface},
 };
 use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
@@ -16,10 +16,10 @@ use zk_mailbox_application_types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
 };
 
-pub async fn prove(mock_light_client: MockLightClient) {
+pub async fn prove(mock_light_client: DefaultClient) {
     // required neutron storage key(s)
     let (neutron_root, neutron_height) = mock_light_client
-        .neutron_light_client
+        .neutron_client
         .get_latest_root_and_height()
         .await;
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
@@ -30,7 +30,7 @@ pub async fn prove(mock_light_client: MockLightClient) {
 
     // required ethereum storage key(s)
     let (ethereum_root, ethereum_height) = mock_light_client
-        .ethereum_light_client
+        .ethereum_client
         .get_latest_root_and_height()
         .await;
     let slot: U256 = alloy_primitives::U256::from(0);

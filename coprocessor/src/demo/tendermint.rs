@@ -5,9 +5,7 @@ mod test {
     use tendermint_program_types::TendermintOutput;
 
     use crate::{
-        client::{
-            DefaultClient, DefaultClientInterface, DefaultEthereumClient, DefaultNeutronClient,
-        },
+        clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient},
         read_ethereum_rpc_url, read_neutron_rpc_url,
     };
 
@@ -17,10 +15,10 @@ mod test {
         dotenvy::dotenv().ok();
 
         let mock_light_client = DefaultClient {
-            neutron_client: DefaultNeutronClient {
+            neutron_client: NeutronClient {
                 rpc_url: read_neutron_rpc_url(),
             },
-            ethereum_client: DefaultEthereumClient {
+            ethereum_client: EthereumClient {
                 rpc_url: read_ethereum_rpc_url(),
             },
         };

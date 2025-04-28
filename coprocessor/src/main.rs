@@ -3,10 +3,10 @@ use dotenvy::dotenv;
 use examples::mailbox;
 #[cfg(feature = "rate")]
 use examples::rate;
+mod clients;
 mod coprocessor;
 mod demo;
-mod lightclients;
-use lightclients::{MockEthereumLightClient, MockLightClient, MockNeutronLightClient};
+use clients::{DefaultClient, EthereumClient, NeutronClient};
 use sp1_sdk::include_elf;
 use std::{env, time::Instant};
 mod examples;
@@ -16,11 +16,11 @@ pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-appl
 
 #[tokio::main]
 async fn main() {
-    let mock_light_client = MockLightClient {
-        neutron_light_client: MockNeutronLightClient {
+    let default_client = DefaultClient {
+        neutron_client: NeutronClient {
             rpc_url: read_neutron_rpc_url(),
         },
-        ethereum_light_client: MockEthereumLightClient {
+        ethereum_client: EthereumClient {
             rpc_url: read_ethereum_rpc_url(),
         },
     };
@@ -29,12 +29,12 @@ async fn main() {
     #[cfg(feature = "rate")]
     {
         println!("Running rate example");
-        rate::prove(mock_light_client.clone()).await;
+        rate::prove(default_client.clone()).await;
     }
     #[cfg(feature = "mailbox")]
     {
         println!("Running mailbox example");
-        mailbox::prove(mock_light_client).await;
+        mailbox::prove(default_client).await;
     }
     let end_time = Instant::now();
     let duration = end_time.duration_since(start_time);
