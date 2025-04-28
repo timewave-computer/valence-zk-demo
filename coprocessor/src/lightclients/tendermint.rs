@@ -28,12 +28,6 @@ mod test {
             let tendermint_rpc_client = TendermintRPCClient::default();
             let prover = TendermintProver::new();
             let trusted_block_height: u64 = self.trusted_height;
-            if trusted_block_height == 0 {
-                panic!(
-                    "No trusted height found on the contract. Something is wrong with the contract."
-                );
-            }
-
             //let chain_latest_block_height = tendermint_rpc_client.get_latest_block_height().await;
             let (trusted_light_block, target_light_block) = tendermint_rpc_client
                 .get_light_blocks(trusted_block_height, self.target_height)

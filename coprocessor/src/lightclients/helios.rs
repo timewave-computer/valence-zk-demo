@@ -1,23 +1,3 @@
-// Messaeg Demo with ZK Light Client proof verification
-/* Todo
-    1. Define some initial state:
-    - Neutron Root
-    - Neutron Height
-    - Ethereum Height
-
-
-    2. Request an update from each light client:
-    - Neutron Proof, State
-    - EthereumProof, State
-
-    3. Query for state proofs at the output heights
-    - Insert that state into the SMT
-    - Insert the light client updates into the SMT
-
-    4. Run the coprocessor circuit to prove this new state
-    - Must commit to the keys that were verified!
-*/
-
 use alloy::dyn_abi::SolType;
 use anyhow::Result;
 use helios_consensus_core::consensus_spec::MainnetConsensusSpec;
