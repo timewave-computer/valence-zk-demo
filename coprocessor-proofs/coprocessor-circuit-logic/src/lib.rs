@@ -1,58 +1,41 @@
-use common_merkle_proofs::merkle::types::MerkleVerifiable;
-use types::{CoprocessorCircuitInputs, CoprocessorCircuitOutputs};
-use valence_coprocessor_core::MemorySmt;
+use sp1_verifier::Groth16Verifier;
+use types::CoprocessorCircuitInputs;
 
 // todo: factor the logic from coprocessor-circuit-sp1 into this file
 pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> Vec<u8> {
-    assert!(MemorySmt::verify(
-        "demo",
-        &inputs.coprocessor_root,
-        &inputs.ethereum_root_opening,
-    ));
-    assert!(MemorySmt::verify(
-        "demo",
-        &inputs.coprocessor_root,
-        &inputs.neutron_root_opening,
-    ));
-
-    for ethereum_proof in inputs.ethereum_merkle_proofs.clone() {
-        // verify the storage proof against the account hash
-        ethereum_proof
-            .1
-            .verify(&ethereum_proof.2)
-            .expect("Failed to verify Ethereum storage proof");
-        // verify the account proof against the ethereum root
-        ethereum_proof
-            .0
-            .verify(&inputs.ethereum_root)
-            .expect("Failed to verify Ethereum account proof");
-    }
-    for neutron_proof in inputs.neutron_merkle_proofs.clone() {
-        // verify the proof against the neutron root
-        neutron_proof
-            .verify(&inputs.neutron_root)
-            .expect("Failed to verify Neutron storage proof");
-    }
-
-    // todo: commit the keys so we know which values were actually verified
-    let verified_ethereum_keys: Vec<Vec<u8>> = inputs
-        .ethereum_merkle_proofs
-        .iter()
-        .map(|proof| proof.1.key.clone())
-        .collect();
-
-    let verified_neutron_keys: Vec<String> = inputs
-        .neutron_merkle_proofs
-        .iter()
-        .map(|proof| proof.key.to_string())
-        .collect();
-
-    borsh::to_vec(&CoprocessorCircuitOutputs {
-        neutron_root: inputs.neutron_root,
-        ethereum_root: inputs.ethereum_root,
-        coprocessor_root: inputs.coprocessor_root,
-        ethereum_keys: verified_ethereum_keys,
-        neutron_keys: verified_neutron_keys,
-    })
-    .expect("Failed to serialize circuit outputs")
+    let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
+    // verify the helios update proof
+    Groth16Verifier::verify(
+        &inputs.tendermint_proof,
+        &inputs.tendermint_public_values,
+        &inputs.tendermint_vk,
+        groth16_vk,
+    )
+    .expect("Failed to verify tendermint zk light client update");
+    // verify the tendermint update proof
+    Groth16Verifier::verify(
+        &inputs.helios_proof,
+        &inputs.helios_public_values,
+        &inputs.helios_vk,
+        groth16_vk,
+    )
+    .expect("Failed to verify helios zk light client update");
+    // todo: commit the new SMT root after inserting the new roots at the target values
+    vec![]
 }
+
+/* Decode the zk light client outputs
+
+let tendermint_output: TendermintOutput =
+serde_json::from_slice(&tendermint_light_client_proof.public_values.to_vec()).unwrap();
+
+let helios_output: ProofOutputs = ProofOutputs::abi_decode(
+    &ethereum_light_client_proof
+        .unwrap()
+        .unwrap()
+        .public_values
+        .to_vec(),
+    false,
+)
+.unwrap();
+*/

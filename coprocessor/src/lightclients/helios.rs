@@ -7,7 +7,8 @@ use helios_ethereum::rpc::http_rpc::HttpRpc;
 use helios_operator::{get_checkpoint, get_client, get_updates};
 use sp1_helios_primitives::types::{ProofInputs, ProofOutputs};
 use sp1_sdk::{
-    EnvProver, ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey,
+    EnvProver, HashableKey, ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin,
+    SP1VerifyingKey,
 };
 
 pub const ELF: &[u8] = include_bytes!("../../../elfs/sp1-helios-elf");
@@ -21,10 +22,8 @@ pub struct SP1HeliosOperator {
 impl SP1HeliosOperator {
     pub fn new() -> Self {
         dotenvy::dotenv().ok();
-
         let client = ProverClient::from_env();
         let (pk, vk) = client.setup(ELF);
-
         Self { client, pk, vk }
     }
 
@@ -68,6 +67,10 @@ impl SP1HeliosOperator {
 
         // Request an update
         self.request_update(client).await
+    }
+
+    pub fn get_vk(&self) -> String {
+        self.vk.bytes32()
     }
 }
 

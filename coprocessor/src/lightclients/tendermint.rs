@@ -23,10 +23,7 @@ impl SP1TendermintOperator {
             .get_light_blocks(trusted_block_height, self.target_height)
             .await;
         // Generate a proof of the transition from the trusted block to the target block.
-        let proof = prover.generate_tendermint_proof(&trusted_light_block, &target_light_block);
-        /*let proof_out: TendermintOutput =
-        serde_json::from_slice(&proof_data.public_values.to_vec()).unwrap();*/
-        proof
+        prover.generate_tendermint_proof(&trusted_light_block, &target_light_block)
     }
 }
 

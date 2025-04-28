@@ -92,8 +92,8 @@ impl ClientInterface for EthereumClient {
 /// simultaneously, which is useful for cross-chain operations.
 #[derive(Debug, Clone)]
 pub struct DefaultClient {
-    /// Instance of the Neutron light client
+    /// Instance of the Neutron client
     pub neutron_client: NeutronClient,
-    /// Instance of the Ethereum light client
+    /// Instance of the Ethereum client
     pub ethereum_client: EthereumClient,
 }

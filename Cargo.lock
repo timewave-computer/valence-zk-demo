@@ -2542,6 +2542,8 @@ dependencies = [
  "borsh",
  "common",
  "coprocessor-circuit-types",
+ "serde_json",
+ "sp1-verifier",
  "sp1-zkvm",
  "valence-coprocessor",
 ]

@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 sp1-zkvm.workspace = true
 common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+serde_json.workspace = true
 types = { package = "coprocessor-circuit-types", path = "../coprocessor-circuit-types" }
 borsh.workspace = true
 valence-coprocessor-core.workspace = true
+sp1-verifier.workspace = true

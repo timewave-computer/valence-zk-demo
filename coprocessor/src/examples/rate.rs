@@ -4,7 +4,6 @@ use crate::{
     RATE_APPLICATION_CIRCUIT_ELF,
     clients::{ClientInterface, DefaultClient},
     coprocessor::{Coprocessor, CoprocessorInterface},
-    examples::prove_coprocessor,
     read_ethereum_default_account_address, read_neutron_default_account_address,
 };
 use alloy::{
