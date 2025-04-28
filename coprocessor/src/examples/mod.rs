@@ -1,7 +1,8 @@
-use crate::coprocessor::Coprocessor;
-use coprocessor_circuit_types::CoprocessorCircuitOutputs;
-use sp1_sdk::HashableKey;
-use sp1_verifier::Groth16Verifier;
+use crate::{
+    clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient},
+    coprocessor::Coprocessor,
+    read_ethereum_rpc_url, read_neutron_rpc_url,
+};
 
 #[cfg(feature = "mailbox")]
 pub mod mailbox;
@@ -21,55 +22,29 @@ pub async fn prove_coprocessor(
     ethereum_root: Vec<u8>,
     neutron_root: Vec<u8>,
 ) {
-    #[cfg(feature = "coprocessor")]
-    {
-        let (proof, vk) = coprocessor
-            .prove_progression(
-                merkle_proofs.0.clone(),
-                merkle_proofs.1.clone(),
-                ethereum_root,
-                neutron_root,
-            )
-            .await;
-        let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
-        Groth16Verifier::verify(
-            &proof.bytes(),
-            &proof.public_values.to_vec(),
-            &vk.bytes32(),
-            groth16_vk,
-        )
-        .unwrap();
-        let coprocessor_circuit_outputs: CoprocessorCircuitOutputs =
-            borsh::from_slice(proof.public_values.as_slice()).unwrap();
-        println!(
-            "Coprocessor Circuit Outputs: {:?}",
-            coprocessor_circuit_outputs
-        );
-    }
-
-    #[cfg(not(feature = "coprocessor"))]
-    {
-        for proof in merkle_proofs.0.clone() {
-            coprocessor.smt_root = coprocessor
-                .smt_tree
-                .insert(
-                    coprocessor.smt_root,
-                    "demo",
-                    &borsh::to_vec(&proof).unwrap(),
-                    borsh::to_vec(&proof).unwrap(),
-                )
-                .unwrap();
-        }
-        for proof in merkle_proofs.1.clone() {
-            coprocessor.smt_root = coprocessor
-                .smt_tree
-                .insert(
-                    coprocessor.smt_root,
-                    "demo",
-                    &borsh::to_vec(&proof.1).unwrap(),
-                    borsh::to_vec(&proof.1).unwrap(),
-                )
-                .unwrap();
-        }
-    }
+    let mut coprocessor = Coprocessor::from_env();
+    let default_client = DefaultClient {
+        neutron_client: NeutronClient {
+            rpc_url: read_neutron_rpc_url(),
+        },
+        ethereum_client: EthereumClient {
+            rpc_url: read_ethereum_rpc_url(),
+        },
+    };
+    let neutron_target_block_height: u64 = default_client
+        .neutron_client
+        .get_latest_root_and_height()
+        .await
+        .1;
+    // for this example we assume our trusted block height is 10 blocks behind the target height
+    let neutron_example_trusted_height: u64 = neutron_target_block_height - 10;
+    coprocessor.target_neutron_height = neutron_target_block_height;
+    coprocessor.trusted_neutron_height = neutron_example_trusted_height;
+    let neutron_trusted_root = default_client
+        .neutron_client
+        .get_state_at_height(neutron_example_trusted_height)
+        .await
+        .0;
+    coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
+    // todo: do the same for ethereum
 }

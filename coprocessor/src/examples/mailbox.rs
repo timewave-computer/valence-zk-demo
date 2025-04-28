@@ -38,15 +38,17 @@ pub async fn prove(mock_light_client: DefaultClient) {
     let encoded_key = (counter, slot).abi_encode();
     let ethereum_mailbox_messages_key = digest_keccak(&encoded_key).to_vec();
 
-    let mut coprocessor = Coprocessor::from_env_with_storage_keys(
-        vec![neutron_mailbox_messages_key],
-        vec![(
-            ethereum_mailbox_messages_key,
-            read_ethereum_mailbox_example_contract_address(),
-        )],
-    );
+    let mut coprocessor = Coprocessor::from_env();
     let merkle_proofs = coprocessor
-        .get_storage_merkle_proofs(neutron_height, ethereum_height)
+        .get_storage_merkle_proofs(
+            neutron_height,
+            ethereum_height,
+            vec![neutron_mailbox_messages_key],
+            vec![(
+                ethereum_mailbox_messages_key,
+                read_ethereum_mailbox_example_contract_address(),
+            )],
+        )
         .await;
 
     prove_coprocessor(

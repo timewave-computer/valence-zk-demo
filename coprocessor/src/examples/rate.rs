@@ -42,18 +42,20 @@ pub async fn prove(mock_light_client: DefaultClient) {
     let ethereum_vault_balances_key = digest_keccak(&encoded_key).to_vec();
     let ethereum_vault_contract_address = read_ethereum_vault_example_contract_address();
     let ethereum_vault_shares_key = hex::decode(read_ethereum_vault_shares_storage_key()).unwrap();
-    let mut coprocessor = Coprocessor::from_env_with_storage_keys(
-        vec![neutron_vault_balance_key, neutron_vault_shares_key],
-        vec![
-            (
-                ethereum_vault_balances_key,
-                ethereum_vault_contract_address.clone(),
-            ),
-            (ethereum_vault_shares_key, ethereum_vault_contract_address),
-        ],
-    );
+    let mut coprocessor = Coprocessor::from_env();
     let merkle_proofs = coprocessor
-        .get_storage_merkle_proofs(neutron_height, ethereum_height)
+        .get_storage_merkle_proofs(
+            neutron_height,
+            ethereum_height,
+            vec![neutron_vault_balance_key, neutron_vault_shares_key],
+            vec![
+                (
+                    ethereum_vault_balances_key,
+                    ethereum_vault_contract_address.clone(),
+                ),
+                (ethereum_vault_shares_key, ethereum_vault_contract_address),
+            ],
+        )
         .await;
 
     prove_coprocessor(

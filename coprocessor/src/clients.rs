@@ -49,6 +49,23 @@ impl ClientInterface for NeutronClient {
     }
 }
 
+impl NeutronClient {
+    pub async fn get_state_at_height(&self, height: u64) -> (Vec<u8>, u64) {
+        let tendermint_client =
+            tendermint_rpc::HttpClient::new(TendermintUrl::from_str(&self.rpc_url).unwrap())
+                .unwrap();
+        let latest_block = tendermint_client.latest_block().await.unwrap();
+        let app_hash = base64::engine::general_purpose::STANDARD
+            .encode(hex::decode(latest_block.block.header.app_hash.to_string()).unwrap());
+        (
+            base64::engine::general_purpose::STANDARD
+                .decode(app_hash)
+                .unwrap(),
+            height,
+        )
+    }
+}
+
 /// Client implementation for interacting with the Ethereum blockchain
 #[derive(Debug, Clone)]
 pub struct EthereumClient {

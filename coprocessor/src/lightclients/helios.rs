@@ -73,12 +73,10 @@ impl SP1HeliosOperator {
 
 #[cfg(test)]
 mod test {
+    use super::SP1HeliosOperator;
     use sp1_sdk::HashableKey;
     use sp1_verifier::Groth16Verifier;
-
-    use super::SP1HeliosOperator;
     use std::time::Instant;
-
     #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
     async fn test_helios_prover() {
         let start_time = Instant::now();

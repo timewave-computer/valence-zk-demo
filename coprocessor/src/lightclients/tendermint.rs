@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use sp1_sdk::{ProverClient, SP1ProofWithPublicValues};
+    use sp1_sdk::SP1ProofWithPublicValues;
     use sp1_verifier::Groth16Verifier;
     use std::time::Instant;
     use tendermint_operator::{TendermintProver, util::TendermintRPCClient};
@@ -44,7 +44,7 @@ mod test {
     async fn test_tendermint_prover_and_verifier() {
         let start_time = Instant::now();
         dotenvy::dotenv().ok();
-        let mock_light_client = DefaultClient {
+        let default_client = DefaultClient {
             neutron_client: NeutronClient {
                 rpc_url: read_neutron_rpc_url(),
             },
@@ -52,18 +52,12 @@ mod test {
                 rpc_url: read_ethereum_rpc_url(),
             },
         };
-        let target_block_height: u64 = mock_light_client
+        let target_block_height: u64 = default_client
             .neutron_client
             .get_latest_root_and_height()
             .await
             .1;
         let trusted_block_height: u64 = target_block_height - 10;
-        if trusted_block_height == 0 {
-            panic!(
-                "No trusted height found on the contract. Something is wrong with the contract."
-            );
-        }
-
         let operator = SP1TendermintOperator::new(trusted_block_height, target_block_height);
         let proof = operator.run().await;
 
