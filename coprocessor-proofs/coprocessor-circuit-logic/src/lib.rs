@@ -10,6 +10,12 @@ pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&inputs.helios_public_values, false).unwrap();
 
+    // assert the trusted values
+    assert!(inputs.previous_neutron_height < tendermint_output.targetHeight);
+    assert!(inputs.previous_ethereum_height < helios_output.newHead.try_into().unwrap());
+    assert!(inputs.previous_neutron_root == tendermint_output.trustedHeaderHash.to_vec());
+    assert!(inputs.previous_ethereum_root == helios_output.prevHeader.to_vec());
+
     // these are the targets that we want to insert and commit
     let target_tendermint_height = tendermint_output.targetHeight;
     let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();

@@ -75,8 +75,8 @@ pub struct Coprocessor {
     pub trusted_ethereum_height: u64,
     pub target_neutron_height: u64,
     pub target_ethereum_height: u64,
-    pub trusted_neutron_root: [u8; 32],
-    pub trusted_ethereum_root: [u8; 32],
+    pub trusted_neutron_root: Vec<u8>,
+    pub trusted_ethereum_root: Vec<u8>,
 }
 
 impl Coprocessor {
@@ -102,8 +102,8 @@ impl Coprocessor {
             target_neutron_height: 0,
             trusted_ethereum_height: 0,
             trusted_neutron_height: 0,
-            trusted_ethereum_root: [0; 32],
-            trusted_neutron_root: [0; 32],
+            trusted_ethereum_root: vec![],
+            trusted_neutron_root: vec![],
         }
     }
 

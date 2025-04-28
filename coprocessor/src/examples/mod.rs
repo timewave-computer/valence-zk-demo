@@ -110,30 +110,22 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     let mut openings: Vec<SmtOpening> = vec![];
     let tendermint_height_opening = coprocessor
         .smt_tree
-        .get_opening(
-            "demo",
-            coprocessor_root,
-            &target_tendermint_height.to_be_bytes(),
-        )
+        .get_opening("demo", coprocessor_root, &neutron_height_key)
         .unwrap()
         .unwrap();
     let ethereum_height_opening = coprocessor
         .smt_tree
-        .get_opening(
-            "demo",
-            coprocessor_root,
-            &target_ethereum_height.to_be_bytes(),
-        )
+        .get_opening("demo", coprocessor_root, &ethereum_height_key)
         .unwrap()
         .unwrap();
     let tendermint_root_opening = coprocessor
         .smt_tree
-        .get_opening("demo", coprocessor_root, &target_tendermint_root)
+        .get_opening("demo", coprocessor_root, &tendermint_root_key)
         .unwrap()
         .unwrap();
     let ethereum_root_opening = coprocessor
         .smt_tree
-        .get_opening("demo", coprocessor_root, &target_ethereum_root)
+        .get_opening("demo", coprocessor_root, &ethereum_root_key)
         .unwrap()
         .unwrap();
 
@@ -141,6 +133,11 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     openings.push(ethereum_height_opening);
     openings.push(tendermint_root_opening);
     openings.push(ethereum_root_opening);
+
+    coprocessor.trusted_neutron_height = tendermint_output.trustedHeight;
+    coprocessor.trusted_ethereum_height = helios_output.prevHead.try_into().unwrap();
+    coprocessor.trusted_neutron_root = tendermint_output.trustedHeaderHash.to_vec();
+    coprocessor.trusted_ethereum_root = helios_output.prevHeader.to_vec();
 
     let coprocessor_inputs = CoprocessorCircuitInputs {
         helios_proof: helios_proof_serialized,
