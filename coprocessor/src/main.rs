@@ -1,14 +1,16 @@
+use coprocessor::Coprocessor;
 use dotenvy::dotenv;
 #[cfg(feature = "mailbox")]
 use examples::mailbox;
+use examples::prove_coprocessor;
 #[cfg(feature = "rate")]
 use examples::rate;
 mod clients;
 mod coprocessor;
 mod lightclients;
-use clients::{DefaultClient, EthereumClient, NeutronClient};
+use clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient};
 use sp1_sdk::include_elf;
-use std::{env, time::Instant};
+use std::env;
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
@@ -16,6 +18,7 @@ pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-appl
 
 #[tokio::main]
 async fn main() {
+    let mut coprocessor = Coprocessor::from_env();
     let default_client = DefaultClient {
         neutron_client: NeutronClient {
             rpc_url: read_neutron_rpc_url(),
@@ -24,21 +27,24 @@ async fn main() {
             rpc_url: read_ethereum_rpc_url(),
         },
     };
-
-    let start_time = Instant::now();
-    #[cfg(feature = "rate")]
-    {
-        println!("Running rate example");
-        rate::prove(default_client.clone()).await;
-    }
-    #[cfg(feature = "mailbox")]
-    {
-        println!("Running mailbox example");
-        mailbox::prove(default_client).await;
-    }
-    let end_time = Instant::now();
-    let duration = end_time.duration_since(start_time);
-    println!("Time taken: {:?}", duration);
+    let neutron_target_block_height: u64 = default_client
+        .neutron_client
+        .get_latest_root_and_height()
+        .await
+        .1;
+    // todo: remove hardcoded height and replace it with a real trusted height
+    let neutron_example_trusted_height: u64 = neutron_target_block_height - 10;
+    coprocessor.target_neutron_height = neutron_target_block_height;
+    coprocessor.trusted_neutron_height = neutron_example_trusted_height;
+    let neutron_trusted_root = default_client
+        .neutron_client
+        .get_state_at_height(neutron_example_trusted_height)
+        .await
+        .0;
+    // initialize the trusted root for neutron
+    coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
+    // compute the coprocessor update
+    prove_coprocessor(&mut coprocessor).await;
 }
 
 /// Reads the Neutron RPC URL from environment variables

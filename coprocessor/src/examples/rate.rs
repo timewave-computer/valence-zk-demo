@@ -58,14 +58,6 @@ pub async fn prove(mock_light_client: DefaultClient) {
         )
         .await;
 
-    prove_coprocessor(
-        &mut coprocessor,
-        merkle_proofs.clone(),
-        ethereum_root,
-        neutron_root,
-    )
-    .await;
-
     // get the SMT openings that will be part of the input for our example application
     let neutron_balance_smt_opening = coprocessor.neutron_coprocessor.get_smt_opening(
         &borsh::to_vec(&merkle_proofs.0.first().unwrap()).unwrap(),
