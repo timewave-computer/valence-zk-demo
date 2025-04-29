@@ -64,7 +64,28 @@ async fn main() {
     let ethereum_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
     hasher.update(NEUTRON_ROOT_KEY);
-    let neutron_root_key = hasher.finalize();
+    let neutron_root_key: sha2::digest::generic_array::GenericArray<
+        u8,
+        sha2::digest::typenum::UInt<
+            sha2::digest::typenum::UInt<
+                sha2::digest::typenum::UInt<
+                    sha2::digest::typenum::UInt<
+                        sha2::digest::typenum::UInt<
+                            sha2::digest::typenum::UInt<
+                                sha2::digest::typenum::UTerm,
+                                sha2::digest::consts::B1,
+                            >,
+                            sha2::digest::consts::B0,
+                        >,
+                        sha2::digest::consts::B0,
+                    >,
+                    sha2::digest::consts::B0,
+                >,
+                sha2::digest::consts::B0,
+            >,
+            sha2::digest::consts::B0,
+        >,
+    > = hasher.finalize();
     let mut hasher = Sha256::new();
     hasher.update(ETHEREUM_ROOT_KEY);
     let ethereum_root_key = hasher.finalize();
@@ -110,10 +131,10 @@ pub async fn get_execution_block_height(
     let client = reqwest::Client::new();
     let res = client.get(&url).send().await?.error_for_status()?;
     let json: Value = res.json().await?;
-    let block_number_hex = json["data"]["message"]["body"]["execution_payload"]["block_number"]
+    let block_number = json["data"]["message"]["body"]["execution_payload"]["block_number"]
         .as_str()
         .ok_or("Missing block_number")?;
-    let block_number = u64::from_str_radix(block_number_hex.trim_start_matches("0x"), 16)?;
+    let block_number = u64::from_str_radix(block_number, 10)?;
     Ok(block_number)
 }
 

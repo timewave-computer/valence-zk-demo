@@ -40,6 +40,7 @@ pub async fn prove(
         get_execution_block_height(&read_ethereum_consensus_rpc_url(), beacon_block_slot)
             .await
             .unwrap();
+    println!("Ethereum Height: {}", ethereum_height);
 
     let domain_state_proofs = coprocessor
         .get_storage_merkle_proofs(
