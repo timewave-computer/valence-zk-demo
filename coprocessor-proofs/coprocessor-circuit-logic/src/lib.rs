@@ -1,23 +1,24 @@
 use alloy_sol_types::{SolType, sol};
 use sp1_verifier::Groth16Verifier;
+use tendermint_program_types::TendermintOutput;
 use types::CoprocessorCircuitInputs;
 use valence_coprocessor_core::MemorySmt;
 
 pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
     let neutron_output: TendermintOutput =
-        TendermintOutput::abi_decode(&inputs.neutron_public_values, false).unwrap();
+        serde_json::from_slice(&inputs.neutron_public_values).unwrap();
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&inputs.helios_public_values, false).unwrap();
     // assert the trusted values
-    assert!(inputs.previous_neutron_height < neutron_output.targetHeight);
+    assert!(inputs.previous_neutron_height < neutron_output.target_height);
     assert!(inputs.previous_ethereum_height < helios_output.newHead.try_into().unwrap());
-    assert!(inputs.previous_neutron_root == neutron_output.trustedHeaderHash.to_vec());
+    assert!(inputs.previous_neutron_root == neutron_output.target_header_hash.to_vec());
     assert!(inputs.previous_ethereum_root == helios_output.prevHeader.to_vec());
 
     // these are the targets that we want to insert and commit
-    let target_neutron_height: u64 = neutron_output.targetHeight;
+    let target_neutron_height: u64 = neutron_output.target_height;
     let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
-    let target_neutron_root: Vec<u8> = neutron_output.targetHeaderHash.to_vec();
+    let target_neutron_root: Vec<u8> = neutron_output.target_header_hash.to_vec();
     let target_ethereum_root: Vec<u8> = helios_output.newHeader.to_vec();
 
     // verify the smt inserts of these targets
@@ -73,15 +74,6 @@ pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
     )
     .expect("Failed to verify helios zk light client update");
     inputs.coprocessor_root
-}
-
-sol! {
-    struct TendermintOutput {
-        uint64 trustedHeight;
-        uint64 targetHeight;
-        bytes32 trustedHeaderHash;
-        bytes32 targetHeaderHash;
-    }
 }
 
 sol! {

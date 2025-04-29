@@ -9,6 +9,7 @@ use coprocessor_circuit_types::CoprocessorCircuitInputs;
 use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
+use tendermint_program_types::TendermintOutput;
 
 use crate::{
     COPROCESSOR_CIRCUIT_ELF,
@@ -45,15 +46,14 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     let helios_vk = ethereum_operator.get_vk();
 
     let neutron_output: TendermintOutput =
-        TendermintOutput::abi_decode(&neutron_light_client_proof.public_values.to_vec(), false)
-            .unwrap();
+        serde_json::from_slice(&neutron_light_client_proof.public_values.to_vec()).unwrap();
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&ethereum_light_client_proof.public_values.to_vec(), false)
             .unwrap();
 
-    let target_neutron_root: Vec<u8> = neutron_output.targetHeaderHash.to_vec();
+    let target_neutron_root: Vec<u8> = neutron_output.target_header_hash.to_vec();
     let target_ethereum_root: Vec<u8> = helios_output.newHeader.to_vec();
-    let target_neutron_height: u64 = neutron_output.targetHeight;
+    let target_neutron_height: u64 = neutron_output.target_height;
     let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
 
     let mut coprocessor_root = coprocessor.smt_root;
@@ -131,9 +131,9 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         .unwrap()
         .unwrap();
 
-    coprocessor.trusted_neutron_height = neutron_output.trustedHeight;
+    coprocessor.trusted_neutron_height = neutron_output.target_height;
     coprocessor.trusted_ethereum_height = helios_output.prevHead.try_into().unwrap();
-    coprocessor.trusted_neutron_root = neutron_output.trustedHeaderHash.to_vec();
+    coprocessor.trusted_neutron_root = neutron_output.target_header_hash.to_vec();
     coprocessor.trusted_ethereum_root = helios_output.prevHeader.to_vec();
 
     let coprocessor_inputs = CoprocessorCircuitInputs {
@@ -201,13 +201,4 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     let end_time = Instant::now();
     println!("Time taken: {:?}", end_time.duration_since(start_time));
     (neutron_output, helios_output)
-}
-
-sol! {
-    struct TendermintOutput {
-        uint64 trustedHeight;
-        uint64 targetHeight;
-        bytes32 trustedHeaderHash;
-        bytes32 targetHeaderHash;
-    }
 }
