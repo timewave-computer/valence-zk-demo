@@ -4,19 +4,16 @@
 // We also need to constrain the keys that are being opened on the different domains.
 // How exactly we do this might depend on the type of application we are writing.
 
-use ssz_merkleize::merkleize::{self, merkleize_keys, uint64_to_le_256};
+use ssz_merkleize::merkleize::{merkleize_keys, uint64_to_le_256};
 use types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
     deserialize_ethereum_proof_value_as_string, deserialize_neutron_proof_value_as_string,
 };
-use valence_coprocessor_core::MemorySmt;
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
 
 sp1_zkvm::entrypoint!(main);
 fn main() {
-
     let mut messages: Vec<String> = Vec::new();
-
     let inputs: MailboxApplicationCircuitInputs = serde_json::from_slice::<MailboxApplicationCircuitInputs>(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MailboxApplicationCircuitInputs");
     let tendermint_header_hash = inputs.neutron_block_header.hash().as_bytes().to_vec();
@@ -35,13 +32,12 @@ fn main() {
             .unwrap()
             .to_vec(),
     ]);
+    assert_eq!(target_header_root, inputs.ethereum_root_opening.data);
     // the ethereum state root against which we verify our storage proofs
     let ethereum_state_root = hex::decode(&inputs.beacon_block_header.state_root.trim_start_matches("0x"))
-    .unwrap();
-    
+    .unwrap();    
     // the neutron app hash against which we verify our storage proofs
     let neutron_app_hash = inputs.neutron_block_header.app_hash.as_bytes().to_vec();
-
     // verify the ethereum storage proofs
     for ethereum_proof in inputs.ethereum_storage_proofs {
         ethereum_proof
@@ -49,7 +45,6 @@ fn main() {
             .verify(&ethereum_proof.2)
             .expect("Failed to verify Ethereum storage proof");
         messages.push(deserialize_ethereum_proof_value_as_string(ethereum_proof.1.value));
-
         ethereum_proof
             .0
             .verify(&ethereum_state_root)
@@ -64,7 +59,6 @@ fn main() {
             .expect("Failed to verify Neutron storage proof");
         messages.push(deserialize_neutron_proof_value_as_string(neutron_proof.value));
     };
-
     let output = MailboxApplicationCircuitOutputs{
         messages
     };
