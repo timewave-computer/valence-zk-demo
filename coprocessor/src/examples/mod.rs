@@ -3,13 +3,38 @@ use std::time::Instant;
 use alloy::{
     dyn_abi::SolType,
     signers::k256::sha2::{Digest, Sha256},
-    sol,
+    sol, transports::http::reqwest,
 };
 use coprocessor_circuit_types::CoprocessorCircuitInputs;
+use itertools::Itertools;
 use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
 use tendermint_program_types::TendermintOutput;
+
+
+#[derive(Debug, Clone, Deserialize)]
+struct SignedBeaconBlockHeader {
+    message: BeaconBlockHeader,
+    signature: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct BeaconHeaderSummary {
+    root: String,
+    canonical: bool,
+    header: SignedBeaconBlockHeader,
+}
+
+use serde::{Deserialize, Serialize};
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BeaconBlockHeader {
+    pub slot: String,
+    pub proposer_index: String,
+    pub parent_root: String,    // Hex-encoded 32 bytes (0x-prefixed)
+    pub state_root: String,     // Hex-encoded 32 bytes (0x-prefixed)
+    pub body_root: String,      // Hex-encoded 32 bytes (0x-prefixed)
+}
 
 use crate::{
     COPROCESSOR_CIRCUIT_ELF,
@@ -189,7 +214,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             rpc_url: read_ethereum_rpc_url(),
         },
     };
-    // todo move this to the app circuit
+    // todo: move this to the app circuit
     let tendermint_header = default_client
         .neutron_client
         .get_header_at_height(target_neutron_height)
@@ -200,5 +225,93 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     // return new state (or update on-chain)
     let end_time = Instant::now();
     println!("Time taken: {:?}", end_time.duration_since(start_time));
+
+    let target_beaecon_header = get_beacon_block_header(234644 * 32).await;
+    println!("Target Beacon Header: {:?}", target_beaecon_header);
+
+    // todo: move this into the app circuit
+    let finalized_header_root = merkleize_keys(vec![
+        uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
+        uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
+        alloy::hex::decode(target_beaecon_header.parent_root).unwrap().to_vec(),
+        alloy::hex::decode(target_beaecon_header.state_root).unwrap().to_vec(),
+        alloy::hex::decode(target_beaecon_header.body_root).unwrap().to_vec(),
+    ]);
+
+    assert_eq!(finalized_header_root, target_ethereum_root);
+
+    // next step: store the state root directly in the smt instead of the header root
+
     (neutron_output, helios_output)
+}
+
+pub async fn get_beacon_block_header(slot: u64) -> BeaconBlockHeader {
+    let client = reqwest::Client::new();
+    let url = format!("{}/eth/v1/beacon/headers/{}", "https://lodestar-sepolia.chainsafe.io", slot);
+
+    let resp = client
+        .get(&url)
+        .send()
+        .await.unwrap()
+        .error_for_status().unwrap() // fail if not 200 OK
+        .json::<serde_json::Value>() // API returns wrapped {"data": {...}}
+        .await.unwrap();
+
+    // Unwrap the structure manually
+    let summary: BeaconHeaderSummary = serde_json::from_value(resp["data"].clone()).unwrap();
+    summary.header.message
+}
+
+// helper function to hash a bunch of nodes as ssz
+// yes, Ethereum do be annoying sometimes :D
+pub fn merkleize_keys(mut keys: Vec<Vec<u8>>) -> Vec<u8> {
+    let height = if keys.len() == 1 {
+        1
+    } else {
+        keys.len().next_power_of_two().ilog2() as usize
+    };
+
+    for depth in 0..height {
+        let len_even: usize = keys.len() + keys.len() % 2;
+        let padded_keys = keys
+            .into_iter()
+            .pad_using(len_even, |_| ZERO_HASHES[depth].as_slice().to_vec())
+            .collect_vec();
+        keys = padded_keys
+            .into_iter()
+            .tuples()
+            .map(|(left, right)| compute_digest(&add_left_right(left, &right)))
+            .collect::<Vec<Vec<u8>>>();
+    }
+    keys.pop().unwrap()
+}
+
+fn add_left_right(left: Vec<u8>, right: &Vec<u8>) -> Vec<u8> {
+    let mut value: Vec<u8> = left;
+    value.extend_from_slice(&right);
+    value.to_vec()
+}
+
+fn compute_digest(input: &[u8]) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(input);
+    hasher.finalize().to_vec()
+}
+
+lazy_static::lazy_static! {
+    pub static ref ZERO_HASHES: [[u8; 32]; 2] = {
+        std::iter::successors(Some([0; 32]), |&prev| {
+            Some(compute_digest(&[prev, prev].concat()).try_into().unwrap())
+        })
+        .take(2)
+        .collect_vec()
+        .try_into()
+        .unwrap()
+    };
+}
+
+fn uint64_to_le_256(value: u64) -> Vec<u8> {
+    let mut bytes = value.to_le_bytes().to_vec(); // Convert to little-endian 8 bytes
+    bytes.extend(vec![0u8; 24]); // Pad with 24 zeros to make it 32 bytes
+    bytes
 }
