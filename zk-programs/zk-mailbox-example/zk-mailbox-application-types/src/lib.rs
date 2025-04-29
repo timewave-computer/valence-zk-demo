@@ -1,14 +1,14 @@
 use ethereum_merkle_proofs::merkle_lib::types::EthereumMerkleProof;
 use ics23_merkle_proofs::merkle_lib::types::Ics23MerkleProof;
+use serde::{Deserialize, Serialize};
 use valence_coprocessor_core::SmtOpening;
-use serde::{Serialize, Deserialize};
-/// Inputs for the rate application circuit that contains all necessary merkle proofs
-/// and SMT openings for verifying vault balances and shares across different domains.
+/// Inputs for the mailbox application circuit that contains all necessary merkle proofs
+/// and SMT openings for verifying messages across different domains.
 #[derive(Serialize, Deserialize)]
 pub struct MailboxApplicationCircuitInputs {
-    /// SMT opening for the Neutron vault balance proof
+    /// Ethereum storage proofs for message verification
     pub ethereum_storage_proofs: Vec<(EthereumMerkleProof, EthereumMerkleProof, Vec<u8>)>,
-    /// SMT opening for the Neutron vault shares proof
+    /// Neutron storage proofs for message verification
     pub neutron_storage_proofs: Vec<Ics23MerkleProof>,
     pub neutron_height_opening: SmtOpening,
     pub ethereum_height_opening: SmtOpening,
@@ -20,10 +20,10 @@ pub struct MailboxApplicationCircuitInputs {
     pub coprocessor_root: [u8; 32],
 }
 
-/// Outputs from the rate application circuit containing the calculated rate
+/// Outputs from the mailbox application circuit containing the verified messages
 #[derive(Debug, Clone, borsh::BorshSerialize, borsh::BorshDeserialize)]
 pub struct MailboxApplicationCircuitOutputs {
-    /// The calculated rate based on total balances and shares across domains
+    /// The verified messages from the mailbox
     pub messages: Vec<String>,
 }
 
