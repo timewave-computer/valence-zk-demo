@@ -10,12 +10,18 @@ use types::{
     deserialize_ethereum_proof_value_as_string, deserialize_neutron_proof_value_as_string,
 };
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
+use valence_coprocessor_core::MemorySmt;
 
 sp1_zkvm::entrypoint!(main);
 fn main() {
     let mut messages: Vec<String> = Vec::new();
     let inputs: MailboxApplicationCircuitInputs = serde_json::from_slice::<MailboxApplicationCircuitInputs>(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MailboxApplicationCircuitInputs");
+    // todo: constrain the keys that are being used to match the deterministic keys for the domains
+    MemorySmt::verify("demo", &inputs.coprocessor_root, &inputs.ethereum_height_opening);
+    MemorySmt::verify("demo", &inputs.coprocessor_root, &inputs.neutron_height_opening);
+    MemorySmt::verify("demo", &inputs.coprocessor_root, &inputs.neutron_root_opening);
+    MemorySmt::verify("demo", &inputs.coprocessor_root, &inputs.ethereum_root_opening);
     let tendermint_header_hash = inputs.neutron_block_header.hash().as_bytes().to_vec();
     // verify the neutron app hash against the header root
     assert_eq!(tendermint_header_hash, inputs.neutron_root_opening.data);

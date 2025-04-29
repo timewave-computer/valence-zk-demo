@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use alloy::
     dyn_abi::SolType;
 use coprocessor_circuit_types::CoprocessorCircuitInputs;
@@ -7,18 +5,16 @@ use sha2::{Digest, Sha256};
 use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
-use ssz_merkleize::merkleize::{get_beacon_block_header, merkleize_keys, uint64_to_le_256};
 use tendermint_program_types::TendermintOutput;
 
 use crate::{
-    clients::{DefaultClient, EthereumClient, NeutronClient}, constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, read_ethereum_rpc_url, read_neutron_rpc_url, COPROCESSOR_CIRCUIT_ELF
+constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, COPROCESSOR_CIRCUIT_ELF
 };
 
 #[cfg(feature = "mailbox")]
 pub mod mailbox;
 
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
-    let start_time = Instant::now();
     // todo: set the trusted values for Ethereum
     let neutron_operator = SP1TendermintOperator::new(
         coprocessor.trusted_neutron_height,
@@ -175,14 +171,5 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         groth16_vk,
     )
     .unwrap();
-
-    let default_client = DefaultClient {
-        neutron_client: NeutronClient {
-            rpc_url: read_neutron_rpc_url(),
-        },
-        ethereum_client: EthereumClient {
-            rpc_url: read_ethereum_rpc_url(),
-        },
-    };
     (neutron_output, helios_output)
 }

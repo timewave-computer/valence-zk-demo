@@ -4,7 +4,6 @@
     The new trie root, alongslide with the proof can be sent to the different domains.
 */
 #![no_main]
-use borsh;
 use coprocessor_circuit_logic::coprocessor_logic;
 use types::CoprocessorCircuitInputs;
 sp1_zkvm::entrypoint!(main);

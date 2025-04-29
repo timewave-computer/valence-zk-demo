@@ -3,7 +3,6 @@
 //! This module provides client implementations for interacting with different blockchain networks
 //! in a zero-knowledge context. Currently supports Neutron and Ethereum networks.
 
-use alloy;
 use alloy::providers::{Provider, ProviderBuilder};
 use base64::Engine;
 use std::str::FromStr;

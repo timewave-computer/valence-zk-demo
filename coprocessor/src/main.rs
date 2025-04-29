@@ -1,3 +1,4 @@
+use alloy::transports::http::reqwest;
 use constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY};
 use coprocessor::Coprocessor;
 use dotenvy::dotenv;
@@ -8,6 +9,7 @@ mod clients;
 mod coprocessor;
 mod lightclients;
 use clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient};
+use serde_json::Value;
 use sp1_sdk::include_elf;
 use ssz_merkleize::merkleize::get_beacon_block_header;
 mod constants;
@@ -41,7 +43,7 @@ async fn main() {
         .await
         .0;
     // initialize the trusted root for neutron
-    coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
+    coprocessor.trusted_neutron_root = neutron_trusted_root;
     // compute the coprocessor update
     let coprocessor_outputs = prove_coprocessor(&mut coprocessor).await;
     let neutron_header = default_client
@@ -57,8 +59,24 @@ async fn main() {
     let ethereum_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_ROOT_KEY).expect("Failed to get ethereum root opening").unwrap();
     // now pass the smt openings to the applications 
     #[cfg(feature = "mailbox")]
-    mailbox::prove(default_client, neutron_height_opening, ethereum_height_opening, neutron_root_opening, ethereum_root_opening, neutron_header, beacon_header).await;
+    mailbox::prove(neutron_height_opening, ethereum_height_opening, neutron_root_opening, ethereum_root_opening, neutron_header, beacon_header).await;
 
+}
+
+
+pub async fn get_execution_block_height(beacon_node_url: &str, slot: u64) -> Result<u64, Box<dyn std::error::Error>> {
+    let url = format!("{}/eth/v2/beacon/blocks/{}", beacon_node_url, slot);
+    let client = reqwest::Client::new();
+
+    let res = client.get(&url).send().await?.error_for_status()?;
+    let json: Value = res.json().await?;
+    // Navigate into execution_payload.block_number
+    let block_number_hex = json["data"]["message"]["body"]["execution_payload"]["block_number"]
+        .as_str()
+        .ok_or("Missing block_number")?;
+    // Parse hex string like "0x1234" to u64
+    let block_number = u64::from_str_radix(block_number_hex.trim_start_matches("0x"), 16)?;
+    Ok(block_number)
 }
 
 /// Reads the Neutron RPC URL from environment variables

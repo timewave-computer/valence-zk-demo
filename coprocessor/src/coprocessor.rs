@@ -7,13 +7,9 @@ use ethereum_merkle_proofs::{
 use ics23_merkle_proofs::{
     keys::Ics23Key, merkle_lib::types::Ics23MerkleProof, rpc::Ics23MerkleRpcClient,
 };
-use valence_coprocessor_core::{MemorySmt, SmtOpening};
+use valence_coprocessor_core::MemorySmt;
 
 pub type EthereumKey = Vec<u8>;
-
-pub trait CoprocessorInterface {
-    fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening;
-}
 
 pub struct NeutronMerkleProofProvider {
     pub neutron_rpc_client: Ics23MerkleRpcClient,
@@ -34,11 +30,6 @@ impl NeutronMerkleProofProvider {
             .unwrap()
     }
 }
-impl CoprocessorInterface for NeutronMerkleProofProvider {
-    fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening {
-        tree.get_opening("demo", root, &key).unwrap().unwrap()
-    }
-}
 pub struct EthereumMerkleProofProvider {
     pub ethereum_rpc_client: EvmMerkleRpcClient,
 }
@@ -54,11 +45,6 @@ impl EthereumMerkleProofProvider {
             .await
             .unwrap();
         (account_proof, storage_proof)
-    }
-}
-impl CoprocessorInterface for EthereumMerkleProofProvider {
-    fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening {
-        tree.get_opening("demo", root, &key).unwrap().unwrap()
     }
 }
 pub struct Coprocessor {

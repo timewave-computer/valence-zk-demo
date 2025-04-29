@@ -1,7 +1,5 @@
 use crate::{
-    MAILBOX_APPLICATION_CIRCUIT_ELF,
-    clients::{ClientInterface, DefaultClient},
-    coprocessor::Coprocessor,
+    coprocessor::Coprocessor, get_execution_block_height, MAILBOX_APPLICATION_CIRCUIT_ELF
 };
 use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
@@ -14,8 +12,9 @@ use tendermint::block::Header;
 use valence_coprocessor_core::SmtOpening;
 use zk_mailbox_application_types::MailboxApplicationCircuitInputs;
 use std::env;
+use crate::read_ethereum_consensus_rpc_url;
 
-pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening, neutron_block_header: Header, beacon_block_header: BeaconBlockHeader) {
+pub async fn prove(neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening, neutron_block_header: Header, beacon_block_header: BeaconBlockHeader) {
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
         b"messages",
         "1",
@@ -27,10 +26,14 @@ pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, et
     let ethereum_mailbox_messages_key = digest_keccak(&encoded_key).to_vec();
 
     let mut coprocessor = Coprocessor::from_env();
+    // todo: get the real ethereum height from the beacon block height
+    let beacon_block_slot = u64::from_le_bytes(ethereum_height_opening.key.clone().try_into().unwrap());
+    let ethereum_height = get_execution_block_height(&read_ethereum_consensus_rpc_url(), beacon_block_slot).await.unwrap();
+
     let domain_state_proofs = coprocessor
         .get_storage_merkle_proofs(
             u64::from_le_bytes(neutron_height_opening.key.clone().try_into().unwrap()),
-            u64::from_le_bytes(ethereum_height_opening.key.clone().try_into().unwrap()),
+            ethereum_height,
             vec![neutron_mailbox_messages_key],
             vec![(
                 ethereum_mailbox_messages_key,
