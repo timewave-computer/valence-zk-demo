@@ -1,5 +1,7 @@
-use sp1_sdk::SP1ProofWithPublicValues;
+use sp1_sdk::{HashableKey, ProverClient, SP1ProofWithPublicValues};
 use tendermint_operator::{TendermintProver, util::TendermintRPCClient};
+
+pub const TENDERMINT_ELF: &[u8] = include_bytes!("../../../elfs/tendermint-elf");
 
 pub struct SP1TendermintOperator {
     pub trusted_height: u64,
@@ -25,18 +27,25 @@ impl SP1TendermintOperator {
         // Generate a proof of the transition from the trusted block to the target block.
         prover.generate_tendermint_proof(&trusted_light_block, &target_light_block)
     }
+
+    pub fn get_vk(&self) -> String {
+        let client = ProverClient::from_env();
+        let (_, vk) = client.setup(TENDERMINT_ELF);
+        vk.bytes32().to_string()
+    }
 }
 
 #[cfg(test)]
 mod test {
     use std::time::Instant;
 
+    use sp1_sdk::{HashableKey, ProverClient};
     use sp1_verifier::Groth16Verifier;
     use tendermint_program_types::TendermintOutput;
 
     use crate::{
         clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient},
-        lightclients::tendermint::SP1TendermintOperator,
+        lightclients::tendermint::{SP1TendermintOperator, TENDERMINT_ELF},
         read_ethereum_rpc_url, read_neutron_rpc_url,
     };
 
@@ -63,10 +72,12 @@ mod test {
 
         // verify the light client proof
         let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
+        let client = ProverClient::from_env();
+        let (_, vk) = client.setup(TENDERMINT_ELF);
         Groth16Verifier::verify(
             &proof.bytes(),
             &proof.public_values.to_vec(),
-            "0x00846ef8de8afd003f9c7638d009bbbd22ffcefe4720bbeb35ac467958e7ca76",
+            &vk.bytes32(),
             groth16_vk,
         )
         .unwrap();

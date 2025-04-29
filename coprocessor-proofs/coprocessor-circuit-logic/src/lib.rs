@@ -3,46 +3,68 @@ use sp1_verifier::Groth16Verifier;
 use types::CoprocessorCircuitInputs;
 use valence_coprocessor_core::MemorySmt;
 
-// todo: factor the logic from coprocessor-circuit-sp1 into this file
 pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
-    let tendermint_output: TendermintOutput =
-        TendermintOutput::abi_decode(&inputs.tendermint_public_values, false).unwrap();
+    let neutron_output: TendermintOutput =
+        TendermintOutput::abi_decode(&inputs.neutron_public_values, false).unwrap();
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&inputs.helios_public_values, false).unwrap();
-
     // assert the trusted values
-    assert!(inputs.previous_neutron_height < tendermint_output.targetHeight);
+    assert!(inputs.previous_neutron_height < neutron_output.targetHeight);
     assert!(inputs.previous_ethereum_height < helios_output.newHead.try_into().unwrap());
-    assert!(inputs.previous_neutron_root == tendermint_output.trustedHeaderHash.to_vec());
+    assert!(inputs.previous_neutron_root == neutron_output.trustedHeaderHash.to_vec());
     assert!(inputs.previous_ethereum_root == helios_output.prevHeader.to_vec());
 
     // these are the targets that we want to insert and commit
-    let target_tendermint_height = tendermint_output.targetHeight;
+    let target_neutron_height: u64 = neutron_output.targetHeight;
     let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
-    let target_tendermint_root = tendermint_output.targetHeaderHash.to_vec();
-    let target_ethereum_root = helios_output.newHeader.to_vec();
+    let target_neutron_root: Vec<u8> = neutron_output.targetHeaderHash.to_vec();
+    let target_ethereum_root: Vec<u8> = helios_output.newHeader.to_vec();
+
     // verify the smt inserts of these targets
+    MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.neutron_height_opening,
+    );
+    assert_eq!(
+        &inputs.neutron_height_opening.data,
+        &target_neutron_height.to_be_bytes().to_vec()
+    );
+    MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.ethereum_height_opening,
+    );
+    assert_eq!(
+        &inputs.ethereum_height_opening.data,
+        &target_ethereum_height.to_be_bytes().to_vec()
+    );
+    MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.neutron_root_opening,
+    );
+    assert_eq!(&inputs.neutron_root_opening.data, &target_neutron_root);
+    MemorySmt::verify(
+        "demo",
+        &inputs.coprocessor_root,
+        &inputs.ethereum_root_opening,
+    );
+    assert_eq!(&inputs.ethereum_root_opening.data, &target_ethereum_root);
 
-    let openings = inputs.openings;
+    // the SP1 groth16 verification key
+    let groth16_vk: &[u8] = *sp1_verifier::GROTH16_VK_BYTES;
 
-    for (idx, opening) in openings.into_iter().enumerate() {
-        MemorySmt::verify("demo", &inputs.coprocessor_root, &opening);
-        // todo: assert that the values actually match the targets above
-    }
-
-    // todo assert the inputs that we expect to match
-    // previous roots must match and previous heights must be less than current heights
-
-    let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
-    // verify the helios update proof
+    // verify the neutron update proof
     Groth16Verifier::verify(
-        &inputs.tendermint_proof,
-        &inputs.tendermint_public_values,
-        &inputs.tendermint_vk,
+        &inputs.neutron_proof,
+        &inputs.neutron_public_values,
+        &inputs.neutron_vk,
         groth16_vk,
     )
-    .expect("Failed to verify tendermint zk light client update");
-    // verify the tendermint update proof
+    .expect("Failed to verify neutron zk light client update");
+
+    // verify the ethereum update proof
     Groth16Verifier::verify(
         &inputs.helios_proof,
         &inputs.helios_public_values,
@@ -50,7 +72,6 @@ pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
         groth16_vk,
     )
     .expect("Failed to verify helios zk light client update");
-    // todo: commit the new SMT root after inserting the new roots at the target values
     inputs.coprocessor_root
 }
 
