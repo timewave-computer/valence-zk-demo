@@ -1,1 +1,0 @@
-62d9ef52fd5ca1ad5a5aecedf862fe5f3366bd6080ec25f28d6a0a366cc422f6  neutron_vault_contract.wasm

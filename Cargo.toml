@@ -4,8 +4,6 @@ members = [
     "coprocessor-proofs/coprocessor-circuit-sp1",
     "coprocessor-proofs/coprocessor-circuit-logic",
     "coprocessor",
-    "zk-programs/zk-rate-example/zk-rate-application",
-    "zk-programs/zk-rate-example/zk-rate-application-types",
     "zk-programs/zk-mailbox-example/zk-mailbox-application",
     "zk-programs/zk-mailbox-example/zk-mailbox-application-types", 
     "ssz-merkleize",
@@ -16,7 +14,6 @@ opt-level = 3
 
 exclude = [
     "zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/neutron-mailbox-contract",
-    "zk-programs/zk-rate-example/zk-rate-application-contracts/neutron-vault-contract",
 ]
 
 [workspace.dependencies]
@@ -29,8 +26,6 @@ reqwest = "0.12.15"
 ssz-merkleize={path="ssz-merkleize"}
 zk-mailbox-application = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application" }
 zk-mailbox-application-types = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application-types" }
-zk-rate-application = { path = "zk-programs/zk-rate-example/zk-rate-application" }
-zk-rate-application-types = { path = "zk-programs/zk-rate-example/zk-rate-application-types" }
 coprocessor-circuit-sp1 = { path = "coprocessor-proofs/coprocessor-circuit-sp1" }
 coprocessor-circuit-types = { path = "coprocessor-proofs/coprocessor-circuit-types" }
 valence-coprocessor-core = { package = "valence-coprocessor", git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros" }

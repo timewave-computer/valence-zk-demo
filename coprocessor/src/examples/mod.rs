@@ -16,8 +16,6 @@ use crate::{
 
 #[cfg(feature = "mailbox")]
 pub mod mailbox;
-#[cfg(feature = "rate")]
-pub mod rate;
 
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
     let start_time = Instant::now();
@@ -186,34 +184,5 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             rpc_url: read_ethereum_rpc_url(),
         },
     };
-
-    // these operations must happen before we verify the openings against the roots
-    // that are stored in fixed positions in the SMT
-    // e.g. we need to use this logic to verify the app hash and state root
-    // against the values stored in the SMT
-    /*let tendermint_header = default_client
-        .neutron_client
-        .get_header_at_height(target_neutron_height)
-        .await;
-    let tendermint_header_hash = tendermint_header.hash();
-    assert_eq!(tendermint_header_hash.as_bytes(), target_neutron_root);
-    let end_time = Instant::now();
-    println!("Time taken: {:?}", end_time.duration_since(start_time));
-
-    let target_beaecon_header = get_beacon_block_header(target_ethereum_height).await;
-    let target_header_root = merkleize_keys(vec![
-        uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
-        uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
-        alloy::hex::decode(target_beaecon_header.parent_root)
-            .unwrap()
-            .to_vec(),
-        alloy::hex::decode(target_beaecon_header.state_root)
-            .unwrap()
-            .to_vec(),
-        alloy::hex::decode(target_beaecon_header.body_root)
-            .unwrap()
-            .to_vec(),
-    ]);
-    assert_eq!(target_header_root, target_ethereum_root);*/
     (neutron_output, helios_output)
 }

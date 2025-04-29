@@ -1,5 +1,9 @@
 #![no_main]
 
+// Important Note! There is a constraint missing in this example!
+// We also need to constrain the keys that are being opened on the different domains.
+// How exactly we do this might depend on the type of application we are writing.
+
 use ssz_merkleize::merkleize::{self, merkleize_keys, uint64_to_le_256};
 use types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
@@ -21,13 +25,13 @@ fn main() {
     let target_header_root = merkleize_keys(vec![
         uint64_to_le_256(inputs.beacon_block_header.slot.parse::<u64>().unwrap()),
         uint64_to_le_256(inputs.beacon_block_header.proposer_index.parse::<u64>().unwrap()),
-        hex::decode(&inputs.beacon_block_header.parent_root.trim_start_matches("0x"))
+        hex::decode(inputs.beacon_block_header.parent_root.trim_start_matches("0x"))
         .unwrap()
         .to_vec(),
-        hex::decode(&inputs.beacon_block_header.state_root.trim_start_matches("0x"))
+        hex::decode(inputs.beacon_block_header.state_root.trim_start_matches("0x"))
             .unwrap()
             .to_vec(),
-        hex::decode(&inputs.beacon_block_header.body_root.trim_start_matches("0x"))
+        hex::decode(inputs.beacon_block_header.body_root.trim_start_matches("0x"))
             .unwrap()
             .to_vec(),
     ]);
@@ -60,8 +64,6 @@ fn main() {
             .expect("Failed to verify Neutron storage proof");
         messages.push(deserialize_neutron_proof_value_as_string(neutron_proof.value));
     };
-
-    // todo: constrain the keys
 
     let output = MailboxApplicationCircuitOutputs{
         messages

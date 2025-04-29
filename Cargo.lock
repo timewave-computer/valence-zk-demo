@@ -2536,8 +2536,6 @@ dependencies = [
  "valence-coprocessor",
  "zk-mailbox-application",
  "zk-mailbox-application-types",
- "zk-rate-application",
- "zk-rate-application-types",
 ]
 
 [[package]]
@@ -10315,31 +10313,6 @@ dependencies = [
  "serde_json",
  "ssz-merkleize",
  "tendermint 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "valence-coprocessor",
-]
-
-[[package]]
-name = "zk-rate-application"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "common",
- "sp1-zkvm",
- "valence-coprocessor",
- "zk-rate-application-types",
-]
-
-[[package]]
-name = "zk-rate-application-types"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives 0.8.25",
- "alloy-rlp",
- "borsh",
- "common",
- "ethereum",
- "ics23-cosmos",
- "serde_json",
  "valence-coprocessor",
 ]
 

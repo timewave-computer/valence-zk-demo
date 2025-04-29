@@ -4,8 +4,6 @@ use dotenvy::dotenv;
 #[cfg(feature = "mailbox")]
 use examples::mailbox;
 use examples::prove_coprocessor;
-#[cfg(feature = "rate")]
-use examples::rate;
 mod clients;
 mod coprocessor;
 mod lightclients;
@@ -16,7 +14,6 @@ mod constants;
 use std::env;
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
-pub const RATE_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-rate-application");
 pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-application");
 
 #[tokio::main]
@@ -47,35 +44,11 @@ async fn main() {
     coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
     // compute the coprocessor update
     let coprocessor_outputs = prove_coprocessor(&mut coprocessor).await;
-
-
-
     let neutron_header = default_client
         .neutron_client
         .get_header_at_height(coprocessor_outputs.0.target_height)
         .await;
-    //let tendermint_header_hash = tendermint_header.hash();
-
     let beacon_header = get_beacon_block_header(coprocessor_outputs.1.newHead.try_into().unwrap()).await;
-    /*let target_header_root = merkleize_keys(vec![
-        uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
-        uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
-        alloy::hex::decode(target_beaecon_header.parent_root)
-            .unwrap()
-            .to_vec(),
-        alloy::hex::decode(target_beaecon_header.state_root)
-            .unwrap()
-            .to_vec(),
-        alloy::hex::decode(target_beaecon_header.body_root)
-            .unwrap()
-            .to_vec(),
-    ]);*/
-
-
-
-
-
-
     // pass the headers and proof outputs to the application circuit
     let coprocessor_smt_root = coprocessor.smt_root;
     let neutron_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_HEIGHT_KEY).expect("Failed to get neutron height opening").unwrap();
@@ -95,26 +68,6 @@ async fn main() {
 pub(crate) fn read_neutron_rpc_url() -> String {
     dotenvy::dotenv().ok();
     env::var("NEUTRON_RPC").expect("Missing Neutron RPC url!")
-}
-
-/// Reads the Neutron default account address from environment variables
-///
-/// # Returns
-/// The Neutron default account address as a String
-#[cfg(feature = "rate")]
-pub(crate) fn read_neutron_default_account_address() -> String {
-    dotenv().ok();
-    env::var("NEUTRON_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Neutron Default Account Address!")
-}
-
-/// Reads the Ethereum default account address from environment variables
-///
-/// # Returns
-/// The Ethereum default account address as a String
-#[cfg(feature = "rate")]
-pub(crate) fn read_ethereum_default_account_address() -> String {
-    dotenv().ok();
-    env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
 }
 
 /// Reads the Ethereum RPC URL from environment variables
