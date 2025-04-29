@@ -3,7 +3,7 @@ use std::time::Instant;
 use alloy::{
     dyn_abi::SolType,
     signers::k256::sha2::{Digest, Sha256},
-    sol, transports::http::reqwest,
+    transports::http::reqwest,
 };
 use coprocessor_circuit_types::CoprocessorCircuitInputs;
 use itertools::Itertools;
@@ -11,7 +11,6 @@ use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
 use tendermint_program_types::TendermintOutput;
-
 
 #[derive(Debug, Clone, Deserialize)]
 struct SignedBeaconBlockHeader {
@@ -31,9 +30,9 @@ use serde::{Deserialize, Serialize};
 pub struct BeaconBlockHeader {
     pub slot: String,
     pub proposer_index: String,
-    pub parent_root: String,    // Hex-encoded 32 bytes (0x-prefixed)
-    pub state_root: String,     // Hex-encoded 32 bytes (0x-prefixed)
-    pub body_root: String,      // Hex-encoded 32 bytes (0x-prefixed)
+    pub parent_root: String, // Hex-encoded 32 bytes (0x-prefixed)
+    pub state_root: String,  // Hex-encoded 32 bytes (0x-prefixed)
+    pub body_root: String,   // Hex-encoded 32 bytes (0x-prefixed)
 }
 
 use crate::{
@@ -156,7 +155,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         .unwrap()
         .unwrap();
 
-    coprocessor.trusted_neutron_height = neutron_output.target_height;
+    coprocessor.trusted_neutron_height = neutron_output.trusted_height;
     coprocessor.trusted_ethereum_height = helios_output.prevHead.try_into().unwrap();
     coprocessor.trusted_neutron_root = neutron_output.target_header_hash.to_vec();
     coprocessor.trusted_ethereum_root = helios_output.prevHeader.to_vec();
@@ -214,48 +213,55 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             rpc_url: read_ethereum_rpc_url(),
         },
     };
-    // todo: move this to the app circuit
+
+    // these operations must happen before we verify the openings against the roots
+    // that are stored in fixed positions in the SMT
+    // e.g. we need to use this logic to verify the app hash and state root
+    // against the values stored in the SMT
     let tendermint_header = default_client
         .neutron_client
         .get_header_at_height(target_neutron_height)
         .await;
-    //let tendermint_header_app_hash = tendermint_header.app_hash.clone();
     let tendermint_header_hash = tendermint_header.hash();
     assert_eq!(tendermint_header_hash.as_bytes(), target_neutron_root);
-    // return new state (or update on-chain)
     let end_time = Instant::now();
     println!("Time taken: {:?}", end_time.duration_since(start_time));
 
-    let target_beaecon_header = get_beacon_block_header(234644 * 32).await;
-    println!("Target Beacon Header: {:?}", target_beaecon_header);
-
-    // todo: move this into the app circuit
+    let target_beaecon_header = get_beacon_block_header(target_ethereum_height).await;
     let target_header_root = merkleize_keys(vec![
         uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
         uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
-        alloy::hex::decode(target_beaecon_header.parent_root).unwrap().to_vec(),
-        alloy::hex::decode(target_beaecon_header.state_root).unwrap().to_vec(),
-        alloy::hex::decode(target_beaecon_header.body_root).unwrap().to_vec(),
+        alloy::hex::decode(target_beaecon_header.parent_root)
+            .unwrap()
+            .to_vec(),
+        alloy::hex::decode(target_beaecon_header.state_root)
+            .unwrap()
+            .to_vec(),
+        alloy::hex::decode(target_beaecon_header.body_root)
+            .unwrap()
+            .to_vec(),
     ]);
-
     assert_eq!(target_header_root, target_ethereum_root);
-
-    // next step: store the state root directly in the smt instead of the header root
-
     (neutron_output, helios_output)
 }
 
 pub async fn get_beacon_block_header(slot: u64) -> BeaconBlockHeader {
     let client = reqwest::Client::new();
-    let url = format!("{}/eth/v1/beacon/headers/{}", "https://lodestar-sepolia.chainsafe.io", slot);
+    let url = format!(
+        "{}/eth/v1/beacon/headers/{}",
+        "https://lodestar-sepolia.chainsafe.io", slot
+    );
 
     let resp = client
         .get(&url)
         .send()
-        .await.unwrap()
-        .error_for_status().unwrap() // fail if not 200 OK
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap() // fail if not 200 OK
         .json::<serde_json::Value>() // API returns wrapped {"data": {...}}
-        .await.unwrap();
+        .await
+        .unwrap();
 
     // Unwrap the structure manually
     let summary: BeaconHeaderSummary = serde_json::from_value(resp["data"].clone()).unwrap();
