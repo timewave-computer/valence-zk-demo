@@ -87,3 +87,9 @@ pub(crate) fn read_ethereum_rpc_url() -> String {
     dotenv().ok();
     env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
 }
+
+
+pub (crate) fn read_ethereum_consensus_rpc_url() -> String{
+    dotenv().ok();
+    env::var("SOURCE_CONSENSUS_RPC_URL").expect("Missing Consensus url!")
+}

@@ -1,46 +1,17 @@
 use std::time::Instant;
 
-use alloy::{
-    dyn_abi::SolType,
-    signers::k256::sha2::{Digest, Sha256},
-    transports::http::reqwest,
-};
+use alloy::
+    dyn_abi::SolType;
 use coprocessor_circuit_types::CoprocessorCircuitInputs;
-use itertools::Itertools;
+use sha2::{Digest, Sha256};
 use sp1_helios_primitives::types::ProofOutputs;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
+use ssz_merkleize::merkleize::{get_beacon_block_header, merkleize_keys, uint64_to_le_256};
 use tendermint_program_types::TendermintOutput;
 
-#[derive(Debug, Clone, Deserialize)]
-struct SignedBeaconBlockHeader {
-    message: BeaconBlockHeader,
-    //signature: String,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-struct BeaconHeaderSummary {
-    //root: String,
-    //canonical: bool,
-    header: SignedBeaconBlockHeader,
-}
-
-use serde::{Deserialize, Serialize};
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BeaconBlockHeader {
-    pub slot: String,
-    pub proposer_index: String,
-    pub parent_root: String, // Hex-encoded 32 bytes (0x-prefixed)
-    pub state_root: String,  // Hex-encoded 32 bytes (0x-prefixed)
-    pub body_root: String,   // Hex-encoded 32 bytes (0x-prefixed)
-}
-
 use crate::{
-    COPROCESSOR_CIRCUIT_ELF,
-    clients::{DefaultClient, EthereumClient, NeutronClient},
-    coprocessor::Coprocessor,
-    lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator},
-    read_ethereum_rpc_url, read_neutron_rpc_url,
+    clients::{DefaultClient, EthereumClient, NeutronClient}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, read_ethereum_rpc_url, read_neutron_rpc_url, COPROCESSOR_CIRCUIT_ELF
 };
 
 #[cfg(feature = "mailbox")]
@@ -243,81 +214,4 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     ]);
     assert_eq!(target_header_root, target_ethereum_root);
     (neutron_output, helios_output)
-}
-
-pub async fn get_beacon_block_header(slot: u64) -> BeaconBlockHeader {
-    let client = reqwest::Client::new();
-    let url = format!(
-        "{}/eth/v1/beacon/headers/{}",
-        "https://lodestar-sepolia.chainsafe.io", slot
-    );
-
-    let resp = client
-        .get(&url)
-        .send()
-        .await
-        .unwrap()
-        .error_for_status()
-        .unwrap() // fail if not 200 OK
-        .json::<serde_json::Value>() // API returns wrapped {"data": {...}}
-        .await
-        .unwrap();
-
-    // Unwrap the structure manually
-    let summary: BeaconHeaderSummary = serde_json::from_value(resp["data"].clone()).unwrap();
-    summary.header.message
-}
-
-// helper function to hash a bunch of nodes as ssz
-// yes, Ethereum do be annoying sometimes :D
-pub fn merkleize_keys(mut keys: Vec<Vec<u8>>) -> Vec<u8> {
-    let height = if keys.len() == 1 {
-        1
-    } else {
-        keys.len().next_power_of_two().ilog2() as usize
-    };
-
-    for depth in 0..height {
-        let len_even: usize = keys.len() + keys.len() % 2;
-        let padded_keys = keys
-            .into_iter()
-            .pad_using(len_even, |_| ZERO_HASHES[depth].as_slice().to_vec())
-            .collect_vec();
-        keys = padded_keys
-            .into_iter()
-            .tuples()
-            .map(|(left, right)| compute_digest(&add_left_right(left, &right)))
-            .collect::<Vec<Vec<u8>>>();
-    }
-    keys.pop().unwrap()
-}
-
-fn add_left_right(left: Vec<u8>, right: &Vec<u8>) -> Vec<u8> {
-    let mut value: Vec<u8> = left;
-    value.extend_from_slice(right);
-    value.to_vec()
-}
-
-fn compute_digest(input: &[u8]) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    hasher.update(input);
-    hasher.finalize().to_vec()
-}
-
-lazy_static::lazy_static! {
-    pub static ref ZERO_HASHES: [[u8; 32]; 2] = {
-        std::iter::successors(Some([0; 32]), |&prev| {
-            Some(compute_digest(&[prev, prev].concat()).try_into().unwrap())
-        })
-        .take(2)
-        .collect_vec()
-        .try_into()
-        .unwrap()
-    };
-}
-
-fn uint64_to_le_256(value: u64) -> Vec<u8> {
-    let mut bytes = value.to_le_bytes().to_vec(); // Convert to little-endian 8 bytes
-    bytes.extend(vec![0u8; 24]); // Pad with 24 zeros to make it 32 bytes
-    bytes
 }

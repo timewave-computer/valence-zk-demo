@@ -7,7 +7,8 @@ members = [
     "zk-programs/zk-rate-example/zk-rate-application",
     "zk-programs/zk-rate-example/zk-rate-application-types",
     "zk-programs/zk-mailbox-example/zk-mailbox-application",
-    "zk-programs/zk-mailbox-example/zk-mailbox-application-types",
+    "zk-programs/zk-mailbox-example/zk-mailbox-application-types", 
+    "ssz-merkleize",
 ]
 
 [profile.dev]
@@ -19,7 +20,12 @@ exclude = [
 ]
 
 [workspace.dependencies]
+serde="1"
+itertools = "0.14"
 tendermint = "0.38.1"
+sha2 = "0.10.8"
+reqwest = "0.12.15"
+ssz-merkleize={path="ssz-merkleize"}
 zk-mailbox-application = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application" }
 zk-mailbox-application-types = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application-types" }
 zk-rate-application = { path = "zk-programs/zk-rate-example/zk-rate-application" }

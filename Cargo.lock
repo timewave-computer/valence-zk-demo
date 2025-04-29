@@ -2515,18 +2515,18 @@ dependencies = [
  "helios-ethereum",
  "hex",
  "ics23-cosmos",
- "itertools 0.14.0",
- "lazy_static",
  "program-types",
  "serde",
  "serde_cbor",
  "serde_json",
+ "sha2 0.10.8",
  "sp1-build",
  "sp1-helios-primitives",
  "sp1-helios-program",
  "sp1-helios-script",
  "sp1-sdk",
  "sp1-verifier",
+ "ssz-merkleize",
  "tendermint 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tendermint-operator",
  "tendermint-program",
@@ -8127,6 +8127,18 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
+]
+
+[[package]]
+name = "ssz-merkleize"
+version = "0.1.0"
+dependencies = [
+ "itertools 0.14.0",
+ "lazy_static",
+ "reqwest 0.12.15",
+ "serde",
+ "serde_json",
+ "sha2 0.10.8",
 ]
 
 [[package]]
