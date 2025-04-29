@@ -5,6 +5,7 @@ use itertools::Itertools;
 
 use super::types::{BeaconBlockHeader, BeaconHeaderSummary};
 
+#[cfg(feature = "reqwest")]
 pub async fn get_beacon_block_header(slot: u64) -> BeaconBlockHeader {
     let client = reqwest::Client::new();
     let url = format!(

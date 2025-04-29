@@ -35,7 +35,6 @@ async fn main() {
         .get_latest_root_and_height()
         .await
         .1;
-    // todo: remove hardcoded height and replace it with a real trusted height
     let neutron_example_trusted_height: u64 = neutron_target_block_height - 10;
     coprocessor.target_neutron_height = neutron_target_block_height;
     coprocessor.trusted_neutron_height = neutron_example_trusted_height;
@@ -48,18 +47,44 @@ async fn main() {
     coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
     // compute the coprocessor update
     let coprocessor_outputs = prove_coprocessor(&mut coprocessor).await;
+
+
+
     let neutron_header = default_client
-    .neutron_client
-    .get_header_at_height(coprocessor_outputs.0.target_height)
-    .await;
-    let ethereum_header = get_beacon_block_header(coprocessor_outputs.1.newHead.try_into().unwrap()).await;
+        .neutron_client
+        .get_header_at_height(coprocessor_outputs.0.target_height)
+        .await;
+    //let tendermint_header_hash = tendermint_header.hash();
+
+    let beacon_header = get_beacon_block_header(coprocessor_outputs.1.newHead.try_into().unwrap()).await;
+    /*let target_header_root = merkleize_keys(vec![
+        uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
+        uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
+        alloy::hex::decode(target_beaecon_header.parent_root)
+            .unwrap()
+            .to_vec(),
+        alloy::hex::decode(target_beaecon_header.state_root)
+            .unwrap()
+            .to_vec(),
+        alloy::hex::decode(target_beaecon_header.body_root)
+            .unwrap()
+            .to_vec(),
+    ]);*/
+
+
+
+
+
+
     // pass the headers and proof outputs to the application circuit
     let coprocessor_smt_root = coprocessor.smt_root;
-    let neutron_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_HEIGHT_KEY).expect("Failed to get neutron height opening");
-    let ethereum_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_HEIGHT_KEY).expect("Failed to get ethereum height opening");
-    let neutron_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_ROOT_KEY).expect("Failed to get neutron root opening");
-    let ethereum_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_ROOT_KEY).expect("Failed to get ethereum root opening");
+    let neutron_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_HEIGHT_KEY).expect("Failed to get neutron height opening").unwrap();
+    let ethereum_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_HEIGHT_KEY).expect("Failed to get ethereum height opening").unwrap();
+    let neutron_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_ROOT_KEY).expect("Failed to get neutron root opening").unwrap();
+    let ethereum_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_ROOT_KEY).expect("Failed to get ethereum root opening").unwrap();
     // now pass the smt openings to the applications 
+    #[cfg(feature = "mailbox")]
+    mailbox::prove(default_client, neutron_height_opening, ethereum_height_opening, neutron_root_opening, ethereum_root_opening, neutron_header, beacon_header).await;
 
 }
 

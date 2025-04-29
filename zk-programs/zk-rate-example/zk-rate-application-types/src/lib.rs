@@ -9,13 +9,13 @@ use valence_coprocessor_core::SmtOpening;
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct RateApplicationCircuitInputs {
     /// SMT opening for the Neutron vault balance proof
-    pub neutron_vault_balance_opening: SmtOpening,
+    pub ethereum_storage_proofs: Vec<(EthereumMerkleProof, EthereumMerkleProof, Vec<u8>)>,
     /// SMT opening for the Neutron vault shares proof
-    pub neutron_vault_shares_opening: SmtOpening,
-    /// SMT opening for the Ethereum vault balance proof
-    pub ethereum_vault_balance_opening: SmtOpening,
-    /// SMT opening for the Ethereum vault shares proof
-    pub ethereum_vault_shares_opening: SmtOpening,
+    pub neutron_storage_proofs: Vec<Ics23MerkleProof>,
+    pub neutron_height_opening: SmtOpening,
+    pub ethereum_height_opening: SmtOpening,
+    pub neutron_root_opening: SmtOpening,
+    pub ethereum_root_opening: SmtOpening,
     /// Root of the coprocessor SMT tree
     pub coprocessor_root: [u8; 32],
 }

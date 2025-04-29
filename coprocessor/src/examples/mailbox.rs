@@ -1,33 +1,26 @@
 use crate::{
     MAILBOX_APPLICATION_CIRCUIT_ELF,
     clients::{ClientInterface, DefaultClient},
-    coprocessor::{Coprocessor, CoprocessorInterface},
+    coprocessor::Coprocessor,
 };
 use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
-use sp1_sdk::{HashableKey, ProverClient, SP1Stdin, client};
-use sp1_verifier::Groth16Verifier;
+use sp1_sdk::{ProverClient, SP1Stdin};
+use ssz_merkleize::types::BeaconBlockHeader;
+use tendermint::block::Header;
 use valence_coprocessor_core::SmtOpening;
+use zk_mailbox_application_types::MailboxApplicationCircuitInputs;
 use std::env;
-use zk_mailbox_application_types::{
-    MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
-};
 
-pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening) {
-    // required neutron storage key(s)
-    let (neutron_root, neutron_height) = client.neutron_client.get_latest_root_and_height().await;
+pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening, neutron_block_header: Header, beacon_block_header: BeaconBlockHeader) {
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
         b"messages",
         "1",
         &read_neutron_mailbox_example_contract_address(),
     );
-
-    // required ethereum storage key(s)
-    let (ethereum_root, ethereum_height) =
-        client.ethereum_client.get_latest_root_and_height().await;
     let slot: U256 = alloy_primitives::U256::from(0);
     let counter = U256::from(1);
     let encoded_key = (counter, slot).abi_encode();
@@ -36,8 +29,8 @@ pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, et
     let mut coprocessor = Coprocessor::from_env();
     let domain_state_proofs = coprocessor
         .get_storage_merkle_proofs(
-            neutron_height,
-            ethereum_height,
+            u64::from_le_bytes(neutron_height_opening.key.clone().try_into().unwrap()),
+            u64::from_le_bytes(ethereum_height_opening.key.clone().try_into().unwrap()),
             vec![neutron_mailbox_messages_key],
             vec![(
                 ethereum_mailbox_messages_key,
@@ -45,6 +38,23 @@ pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, et
             )],
         )
         .await;
+    
+    let mailbox_inputs = MailboxApplicationCircuitInputs {
+        neutron_storage_proofs: domain_state_proofs.0,
+        ethereum_storage_proofs: domain_state_proofs.1,
+        neutron_height_opening,
+        ethereum_height_opening,
+        neutron_root_opening,
+        ethereum_root_opening,
+        neutron_block_header,
+        beacon_block_header,
+        coprocessor_root: coprocessor.smt_root,
+    };
+    let prover = ProverClient::from_env();
+    let mut stdin = SP1Stdin::new();
+    let (pk, _) = prover.setup(MAILBOX_APPLICATION_CIRCUIT_ELF);
+    stdin.write_slice(&serde_json::to_vec(&mailbox_inputs).unwrap());
+    let _proof = prover.prove(&pk, &stdin).groth16().run().expect("Failed to prove Mailbox Application!");
 }
 
 /// Reads the Ethereum mailbox example contract address from environment variables

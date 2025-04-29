@@ -10293,6 +10293,7 @@ version = "0.1.0"
 dependencies = [
  "borsh",
  "common",
+ "serde_json",
  "sp1-zkvm",
  "valence-coprocessor",
  "zk-mailbox-application-types",
@@ -10308,7 +10309,10 @@ dependencies = [
  "common",
  "ethereum",
  "ics23-cosmos",
+ "serde",
  "serde_json",
+ "ssz-merkleize",
+ "tendermint 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "valence-coprocessor",
 ]
 

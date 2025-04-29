@@ -1,22 +1,27 @@
-use borsh::{BorshDeserialize, BorshSerialize};
 use ethereum_merkle_proofs::merkle_lib::types::EthereumMerkleProof;
 use ics23_merkle_proofs::merkle_lib::types::Ics23MerkleProof;
 use valence_coprocessor_core::SmtOpening;
-
+use serde::{Serialize, Deserialize};
 /// Inputs for the rate application circuit that contains all necessary merkle proofs
 /// and SMT openings for verifying vault balances and shares across different domains.
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct MailboxApplicationCircuitInputs {
     /// SMT opening for the Neutron vault balance proof
-    pub neutron_messages_openings: Vec<SmtOpening>,
+    pub ethereum_storage_proofs: Vec<(EthereumMerkleProof, EthereumMerkleProof, Vec<u8>)>,
     /// SMT opening for the Neutron vault shares proof
-    pub ethereum_messages_openings: Vec<SmtOpening>,
+    pub neutron_storage_proofs: Vec<Ics23MerkleProof>,
+    pub neutron_height_opening: SmtOpening,
+    pub ethereum_height_opening: SmtOpening,
+    pub neutron_root_opening: SmtOpening,
+    pub ethereum_root_opening: SmtOpening,
+    pub neutron_block_header: tendermint::block::Header,
+    pub beacon_block_header: ssz_merkleize::types::BeaconBlockHeader,
     /// Root of the coprocessor SMT tree
     pub coprocessor_root: [u8; 32],
 }
 
 /// Outputs from the rate application circuit containing the calculated rate
-#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, borsh::BorshSerialize, borsh::BorshDeserialize)]
 pub struct MailboxApplicationCircuitOutputs {
     /// The calculated rate based on total balances and shares across domains
     pub messages: Vec<String>,

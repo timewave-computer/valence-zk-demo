@@ -191,7 +191,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     // that are stored in fixed positions in the SMT
     // e.g. we need to use this logic to verify the app hash and state root
     // against the values stored in the SMT
-    let tendermint_header = default_client
+    /*let tendermint_header = default_client
         .neutron_client
         .get_header_at_height(target_neutron_height)
         .await;
@@ -214,6 +214,6 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             .unwrap()
             .to_vec(),
     ]);
-    assert_eq!(target_header_root, target_ethereum_root);
+    assert_eq!(target_header_root, target_ethereum_root);*/
     (neutron_output, helios_output)
 }
