@@ -19,7 +19,7 @@ exclude = [
 ]
 
 [workspace.dependencies]
-tendermintx = { path = "../tendermintx" }
+tendermint = "0.38.1"
 zk-mailbox-application = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application" }
 zk-mailbox-application-types = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application-types" }
 zk-rate-application = { path = "zk-programs/zk-rate-example/zk-rate-application" }

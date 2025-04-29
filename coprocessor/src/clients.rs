@@ -64,6 +64,13 @@ impl NeutronClient {
             height,
         )
     }
+    pub async fn get_header_at_height(&self, height: u64) -> tendermint::block::header::Header {
+        let tendermint_client =
+            tendermint_rpc::HttpClient::new(TendermintUrl::from_str(&self.rpc_url).unwrap())
+                .unwrap();
+        let header = tendermint_client.block(height as u32).await.unwrap();
+        header.block.header
+    }
 }
 
 /// Client implementation for interacting with the Ethereum blockchain

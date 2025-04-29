@@ -2524,6 +2524,7 @@ dependencies = [
  "sp1-helios-script",
  "sp1-sdk",
  "sp1-verifier",
+ "tendermint 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tendermint-operator",
  "tendermint-program",
  "tendermint-rpc 0.38.1 (registry+https://github.com/rust-lang/crates.io-index)",

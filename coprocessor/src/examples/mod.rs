@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use alloy::{
     dyn_abi::SolType,
     signers::k256::sha2::{Digest, Sha256},
@@ -10,8 +12,10 @@ use sp1_verifier::Groth16Verifier;
 
 use crate::{
     COPROCESSOR_CIRCUIT_ELF,
+    clients::{DefaultClient, EthereumClient, NeutronClient},
     coprocessor::Coprocessor,
     lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator},
+    read_ethereum_rpc_url, read_neutron_rpc_url,
 };
 
 #[cfg(feature = "mailbox")]
@@ -20,6 +24,7 @@ pub mod mailbox;
 pub mod rate;
 
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
+    let start_time = Instant::now();
     // todo: set the trusted values for Ethereum
     let neutron_operator = SP1TendermintOperator::new(
         coprocessor.trusted_neutron_height,
@@ -176,7 +181,25 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     )
     .unwrap();
 
+    let default_client = DefaultClient {
+        neutron_client: NeutronClient {
+            rpc_url: read_neutron_rpc_url(),
+        },
+        ethereum_client: EthereumClient {
+            rpc_url: read_ethereum_rpc_url(),
+        },
+    };
+    // todo move this to the app circuit
+    let tendermint_header = default_client
+        .neutron_client
+        .get_header_at_height(target_neutron_height)
+        .await;
+    //let tendermint_header_app_hash = tendermint_header.app_hash.clone();
+    let tendermint_header_hash = tendermint_header.hash();
+    assert_eq!(tendermint_header_hash.as_bytes(), target_neutron_root);
     // return new state (or update on-chain)
+    let end_time = Instant::now();
+    println!("Time taken: {:?}", end_time.duration_since(start_time));
     (neutron_output, helios_output)
 }
 

@@ -40,9 +40,8 @@ zk-mailbox-application.workspace = true
 zk-mailbox-application-types.workspace = true
 sp1-sdk.workspace = true
 sp1-verifier.workspace = true
-
 anyhow.workspace = true
-
+tendermint.workspace = true
 helios-program = { package = "sp1-helios-program", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
 helios-operator = { package = "sp1-helios-script", git = "https://github.com/timewave-computer/sp1-helios", branch = "valence-compat" }
 helios-consensus-core = { git = "https://github.com/a16z/helios", tag = "0.8.6" }
