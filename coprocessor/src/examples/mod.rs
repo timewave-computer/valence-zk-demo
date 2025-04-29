@@ -16,13 +16,13 @@ use tendermint_program_types::TendermintOutput;
 #[derive(Debug, Clone, Deserialize)]
 struct SignedBeaconBlockHeader {
     message: BeaconBlockHeader,
-    signature: String,
+    //signature: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 struct BeaconHeaderSummary {
-    root: String,
-    canonical: bool,
+    //root: String,
+    //canonical: bool,
     header: SignedBeaconBlockHeader,
 }
 
@@ -83,10 +83,10 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
 
     let mut coprocessor_root = coprocessor.smt_root;
     let mut hasher = Sha256::new();
-    hasher.update(&target_neutron_height.to_be_bytes());
+    hasher.update(target_neutron_height.to_be_bytes());
     let neutron_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
-    hasher.update(&target_ethereum_height.to_be_bytes());
+    hasher.update(target_ethereum_height.to_be_bytes());
     let ethereum_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
     hasher.update(&target_neutron_root);
@@ -230,7 +230,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     println!("Target Beacon Header: {:?}", target_beaecon_header);
 
     // todo: move this into the app circuit
-    let finalized_header_root = merkleize_keys(vec![
+    let target_header_root = merkleize_keys(vec![
         uint64_to_le_256(target_beaecon_header.slot.parse::<u64>().unwrap()),
         uint64_to_le_256(target_beaecon_header.proposer_index.parse::<u64>().unwrap()),
         alloy::hex::decode(target_beaecon_header.parent_root).unwrap().to_vec(),
@@ -238,7 +238,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         alloy::hex::decode(target_beaecon_header.body_root).unwrap().to_vec(),
     ]);
 
-    assert_eq!(finalized_header_root, target_ethereum_root);
+    assert_eq!(target_header_root, target_ethereum_root);
 
     // next step: store the state root directly in the smt instead of the header root
 
@@ -288,7 +288,7 @@ pub fn merkleize_keys(mut keys: Vec<Vec<u8>>) -> Vec<u8> {
 
 fn add_left_right(left: Vec<u8>, right: &Vec<u8>) -> Vec<u8> {
     let mut value: Vec<u8> = left;
-    value.extend_from_slice(&right);
+    value.extend_from_slice(right);
     value.to_vec()
 }
 
