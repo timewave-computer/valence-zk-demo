@@ -1,5 +1,4 @@
-use alloy::
-    dyn_abi::SolType;
+use alloy::dyn_abi::SolType;
 use coprocessor_circuit_types::CoprocessorCircuitInputs;
 use sha2::{Digest, Sha256};
 use sp1_helios_primitives::types::ProofOutputs;
@@ -8,7 +7,10 @@ use sp1_verifier::Groth16Verifier;
 use tendermint_program_types::TendermintOutput;
 
 use crate::{
-constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, COPROCESSOR_CIRCUIT_ELF
+    COPROCESSOR_CIRCUIT_ELF,
+    constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY},
+    coprocessor::Coprocessor,
+    lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator},
 };
 
 #[cfg(feature = "mailbox")]
