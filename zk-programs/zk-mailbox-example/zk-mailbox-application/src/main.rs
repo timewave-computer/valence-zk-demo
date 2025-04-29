@@ -10,6 +10,9 @@ use common_merkle_proofs::merkle::types::MerkleVerifiable;
 
 sp1_zkvm::entrypoint!(main);
 fn main() {
+
+    let mut messages: Vec<String> = Vec::new();
+
     let inputs: MailboxApplicationCircuitInputs = serde_json::from_slice::<MailboxApplicationCircuitInputs>(&sp1_zkvm::io::read_vec())
         .expect("Failed to deserialize MailboxApplicationCircuitInputs");
     let tendermint_header_hash = inputs.neutron_block_header.hash().as_bytes().to_vec();
@@ -41,6 +44,8 @@ fn main() {
             .1
             .verify(&ethereum_proof.2)
             .expect("Failed to verify Ethereum storage proof");
+        messages.push(deserialize_ethereum_proof_value_as_string(ethereum_proof.1.value));
+
         ethereum_proof
             .0
             .verify(&ethereum_state_root)
@@ -53,7 +58,14 @@ fn main() {
         neutron_proof
             .verify(&neutron_app_hash)
             .expect("Failed to verify Neutron storage proof");
+        messages.push(deserialize_neutron_proof_value_as_string(neutron_proof.value));
     };
 
-    assert_eq!(target_header_root, inputs.ethereum_root_opening.data);
+    // todo: constrain the keys
+
+    let output = MailboxApplicationCircuitOutputs{
+        messages
+    };
+
+    sp1_zkvm::io::commit_slice(&borsh::to_vec(&output).unwrap());
 }

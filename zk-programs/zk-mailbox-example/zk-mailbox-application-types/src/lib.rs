@@ -34,9 +34,8 @@ pub struct MailboxApplicationCircuitOutputs {
 ///
 /// # Returns
 /// The deserialized value as a U256 number
-pub fn deserialize_ethereum_proof_value_as_string(proof: SmtOpening) -> String {
-    let ethereum_proof: EthereumMerkleProof = borsh::from_slice(&proof.data).unwrap();
-    decode_rlp_string_alloy(&ethereum_proof.value).unwrap()
+pub fn deserialize_ethereum_proof_value_as_string(data: Vec<u8>) -> String {
+    decode_rlp_string_alloy(&data).unwrap()
 }
 
 /// Deserializes a Neutron merkle proof value into a U256 number
@@ -46,10 +45,8 @@ pub fn deserialize_ethereum_proof_value_as_string(proof: SmtOpening) -> String {
 ///
 /// # Returns
 /// The deserialized value as a U256 number
-pub fn deserialize_neutron_proof_value_as_string(proof: SmtOpening) -> String {
-    let neutron_proof: Ics23MerkleProof = borsh::from_slice(&proof.data).unwrap();
-    let neutron_proof_value = neutron_proof.value;
-    let raw_string = String::from_utf8_lossy(&neutron_proof_value).to_string();
+pub fn deserialize_neutron_proof_value_as_string(data: Vec<u8>) -> String {
+    let raw_string = String::from_utf8_lossy(&data).to_string();
     // Clean the string like we do in the RLP decoder
     raw_string
         .chars()
