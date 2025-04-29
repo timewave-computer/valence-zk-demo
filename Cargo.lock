@@ -10293,8 +10293,10 @@ version = "0.1.0"
 dependencies = [
  "borsh",
  "common",
+ "hex",
  "serde_json",
  "sp1-zkvm",
+ "ssz-merkleize",
  "valence-coprocessor",
  "zk-mailbox-application-types",
 ]

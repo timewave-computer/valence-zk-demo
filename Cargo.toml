@@ -20,6 +20,7 @@ exclude = [
 ]
 
 [workspace.dependencies]
+hex = "0.4"
 serde={version="1", features=["derive"]}
 itertools = "0.14"
 tendermint = "0.38.1"
