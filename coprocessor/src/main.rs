@@ -1,3 +1,4 @@
+use constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY};
 use coprocessor::Coprocessor;
 use dotenvy::dotenv;
 #[cfg(feature = "mailbox")]
@@ -10,6 +11,8 @@ mod coprocessor;
 mod lightclients;
 use clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient};
 use sp1_sdk::include_elf;
+use ssz_merkleize::merkleize::get_beacon_block_header;
+mod constants;
 use std::env;
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
@@ -44,10 +47,20 @@ async fn main() {
     // initialize the trusted root for neutron
     coprocessor.trusted_neutron_root = neutron_trusted_root.try_into().unwrap();
     // compute the coprocessor update
-    let outputs = prove_coprocessor(&mut coprocessor).await;
-    // take the new ethereum state root
-    // take the new tendermint state root
-    // pass these roots to the application circuit and prove the openings against them
+    let coprocessor_outputs = prove_coprocessor(&mut coprocessor).await;
+    let neutron_header = default_client
+    .neutron_client
+    .get_header_at_height(coprocessor_outputs.0.target_height)
+    .await;
+    let ethereum_header = get_beacon_block_header(coprocessor_outputs.1.newHead.try_into().unwrap()).await;
+    // pass the headers and proof outputs to the application circuit
+    let coprocessor_smt_root = coprocessor.smt_root;
+    let neutron_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_HEIGHT_KEY).expect("Failed to get neutron height opening");
+    let ethereum_height_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_HEIGHT_KEY).expect("Failed to get ethereum height opening");
+    let neutron_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, NEUTRON_ROOT_KEY).expect("Failed to get neutron root opening");
+    let ethereum_root_opening = coprocessor.smt_tree.get_opening("demo", coprocessor_smt_root, ETHEREUM_ROOT_KEY).expect("Failed to get ethereum root opening");
+    // now pass the smt openings to the applications 
+
 }
 
 /// Reads the Neutron RPC URL from environment variables

@@ -16,9 +16,10 @@ use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin};
 use sp1_verifier::Groth16Verifier;
+use valence_coprocessor_core::SmtOpening;
 use zk_rate_application_types::{RateApplicationCircuitInputs, RateApplicationCircuitOutputs};
 
-pub async fn prove(client: DefaultClient) {
+pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening) {
     let (neutron_root, neutron_height) = client.neutron_client.get_latest_root_and_height().await;
     let neutron_vault_balance_key = Ics23Key::new_wasm_account_mapping(
         b"balances",

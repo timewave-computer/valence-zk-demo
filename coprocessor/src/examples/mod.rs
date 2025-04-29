@@ -11,7 +11,7 @@ use ssz_merkleize::merkleize::{get_beacon_block_header, merkleize_keys, uint64_t
 use tendermint_program_types::TendermintOutput;
 
 use crate::{
-    clients::{DefaultClient, EthereumClient, NeutronClient}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, read_ethereum_rpc_url, read_neutron_rpc_url, COPROCESSOR_CIRCUIT_ELF
+    clients::{DefaultClient, EthereumClient, NeutronClient}, constants::{ETHEREUM_HEIGHT_KEY, ETHEREUM_ROOT_KEY, NEUTRON_HEIGHT_KEY, NEUTRON_ROOT_KEY}, coprocessor::Coprocessor, lightclients::{helios::SP1HeliosOperator, tendermint::SP1TendermintOperator}, read_ethereum_rpc_url, read_neutron_rpc_url, COPROCESSOR_CIRCUIT_ELF
 };
 
 #[cfg(feature = "mailbox")]
@@ -53,16 +53,16 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
 
     let mut coprocessor_root = coprocessor.smt_root;
     let mut hasher = Sha256::new();
-    hasher.update(target_neutron_height.to_be_bytes());
+    hasher.update(NEUTRON_HEIGHT_KEY);
     let neutron_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
-    hasher.update(target_ethereum_height.to_be_bytes());
+    hasher.update(ETHEREUM_HEIGHT_KEY);
     let ethereum_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
-    hasher.update(&target_neutron_root);
+    hasher.update(NEUTRON_ROOT_KEY);
     let neutron_root_key = hasher.finalize();
     let mut hasher = Sha256::new();
-    hasher.update(&target_ethereum_root);
+    hasher.update(ETHEREUM_ROOT_KEY);
     let ethereum_root_key = hasher.finalize();
 
     coprocessor_root = coprocessor
@@ -104,6 +104,8 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             target_ethereum_root.clone(),
         )
         .expect("Failed to insert Ethereum Root");
+
+    coprocessor.smt_root = coprocessor_root;
 
     let neutron_height_opening = coprocessor
         .smt_tree

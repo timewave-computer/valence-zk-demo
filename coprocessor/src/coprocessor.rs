@@ -15,10 +15,10 @@ pub trait CoprocessorInterface {
     fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening;
 }
 
-pub struct NeutronCoprocessor {
+pub struct NeutronMerkleProofProvider {
     pub neutron_rpc_client: Ics23MerkleRpcClient,
 }
-impl NeutronCoprocessor {
+impl NeutronMerkleProofProvider {
     /// Fetches a storage proof for a given key at a specific block height
     ///
     /// # Arguments
@@ -34,15 +34,15 @@ impl NeutronCoprocessor {
             .unwrap()
     }
 }
-impl CoprocessorInterface for NeutronCoprocessor {
+impl CoprocessorInterface for NeutronMerkleProofProvider {
     fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening {
         tree.get_opening("demo", root, &key).unwrap().unwrap()
     }
 }
-pub struct EthereumCoprocessor {
+pub struct EthereumMerkleProofProvider {
     pub ethereum_rpc_client: EvmMerkleRpcClient,
 }
-impl EthereumCoprocessor {
+impl EthereumMerkleProofProvider {
     async fn get_account_and_storage_proof(
         &self,
         key: (EthereumKey, String),
@@ -56,7 +56,7 @@ impl EthereumCoprocessor {
         (account_proof, storage_proof)
     }
 }
-impl CoprocessorInterface for EthereumCoprocessor {
+impl CoprocessorInterface for EthereumMerkleProofProvider {
     fn get_smt_opening(&mut self, key: &Vec<u8>, tree: &MemorySmt, root: [u8; 32]) -> SmtOpening {
         tree.get_opening("demo", root, &key).unwrap().unwrap()
     }
@@ -67,9 +67,9 @@ pub struct Coprocessor {
     /// The current root hash of the SMT
     pub smt_root: [u8; 32],
     /// RPC client for interacting with Neutron chain
-    pub neutron_coprocessor: NeutronCoprocessor,
+    pub neutron_coprocessor: NeutronMerkleProofProvider,
     /// RPC client for interacting with Ethereum chain
-    pub ethereum_coprocessor: EthereumCoprocessor,
+    pub ethereum_coprocessor: EthereumMerkleProofProvider,
     // light client specific
     pub trusted_neutron_height: u64,
     pub trusted_ethereum_height: u64,
@@ -83,12 +83,12 @@ impl Coprocessor {
     pub fn from_env() -> Self {
         let smt_tree = MemorySmt::default();
         let smt_root = [0; 32];
-        let neutron_coprocessor = NeutronCoprocessor {
+        let neutron_coprocessor = NeutronMerkleProofProvider {
             neutron_rpc_client: Ics23MerkleRpcClient {
                 rpc_url: read_neutron_rpc_url(),
             },
         };
-        let ethereum_coprocessor = EthereumCoprocessor {
+        let ethereum_coprocessor = EthereumMerkleProofProvider {
             ethereum_rpc_client: EvmMerkleRpcClient {
                 rpc_url: read_ethereum_rpc_url(),
             },

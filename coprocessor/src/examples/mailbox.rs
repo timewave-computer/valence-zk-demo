@@ -10,12 +10,13 @@ use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{HashableKey, ProverClient, SP1Stdin, client};
 use sp1_verifier::Groth16Verifier;
+use valence_coprocessor_core::SmtOpening;
 use std::env;
 use zk_mailbox_application_types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
 };
 
-pub async fn prove(client: DefaultClient) {
+pub async fn prove(client: DefaultClient, neutron_height_opening: SmtOpening, ethereum_height_opening: SmtOpening, neutron_root_opening: SmtOpening, ethereum_root_opening: SmtOpening) {
     // required neutron storage key(s)
     let (neutron_root, neutron_height) = client.neutron_client.get_latest_root_and_height().await;
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
