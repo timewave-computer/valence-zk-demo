@@ -8,6 +8,7 @@ use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
 use sp1_sdk::{ProverClient, SP1Stdin};
+use ssz_merkleize::merkleize::get_state_root_at_slot;
 use ssz_merkleize::types::BeaconBlockHeader;
 use std::env;
 use tendermint::block::Header;
@@ -54,6 +55,14 @@ pub async fn prove(
         )
         .await;
 
+    let mock_block_header_verification_data = get_state_root_at_slot(beacon_block_slot).await;
+    assert_eq!(
+        mock_block_header_verification_data.1,
+        hex::decode(beacon_block_header.body_root.trim_start_matches("0x"))
+            .unwrap()
+            .to_vec()
+    );
+
     let mailbox_inputs = MailboxApplicationCircuitInputs {
         neutron_storage_proofs: domain_state_proofs.0,
         ethereum_storage_proofs: domain_state_proofs.1,
@@ -64,6 +73,7 @@ pub async fn prove(
         neutron_block_header,
         beacon_block_header,
         coprocessor_root: coprocessor.smt_root,
+        temporary_debug_state_root: mock_block_header_verification_data.0.try_into().unwrap(),
     };
     let prover = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
