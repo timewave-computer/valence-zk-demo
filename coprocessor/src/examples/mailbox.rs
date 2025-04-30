@@ -56,6 +56,10 @@ pub async fn prove(
         .await;
 
     let mock_block_header_verification_data = get_state_root_at_slot(beacon_block_slot).await;
+    println!(
+        "Mock Block Header Verification Data: {:?}",
+        mock_block_header_verification_data
+    );
     assert_eq!(
         mock_block_header_verification_data.1,
         hex::decode(beacon_block_header.body_root.trim_start_matches("0x"))

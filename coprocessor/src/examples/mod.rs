@@ -17,24 +17,24 @@ use crate::{
 pub mod mailbox;
 
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
+    let mut ethereum_operator = SP1HeliosOperator::new();
+    // todo: remove hardcoded ethereum height and replace it with a real trusted height
+    let ethereum_light_client_proof = ethereum_operator.run(7520256).await;
+    let ethereum_light_client_proof = ethereum_light_client_proof.unwrap().unwrap();
+    let helios_proof_serialized = ethereum_light_client_proof.bytes();
+    let helios_public_values = ethereum_light_client_proof.public_values.to_vec();
+    let helios_vk = ethereum_operator.get_vk();
+
     // todo: set the trusted values for Ethereum
     let neutron_operator = SP1TendermintOperator::new(
         coprocessor.trusted_neutron_height,
         coprocessor.target_neutron_height,
     );
     let neutron_light_client_proof = neutron_operator.run().await;
-    let mut ethereum_operator = SP1HeliosOperator::new();
-    // todo: remove hardcoded ethereum height and replace it with a real trusted height
-    let ethereum_light_client_proof = ethereum_operator.run(234644 * 32).await;
 
     let neutron_proof_serialized = neutron_light_client_proof.bytes();
     let neutron_public_values = neutron_light_client_proof.public_values.to_vec();
     let neutron_vk = neutron_operator.get_vk();
-
-    let ethereum_light_client_proof = ethereum_light_client_proof.unwrap().unwrap();
-    let helios_proof_serialized = ethereum_light_client_proof.bytes();
-    let helios_public_values = ethereum_light_client_proof.public_values.to_vec();
-    let helios_vk = ethereum_operator.get_vk();
 
     let neutron_output: TendermintOutput =
         serde_json::from_slice(&neutron_light_client_proof.public_values.to_vec()).unwrap();

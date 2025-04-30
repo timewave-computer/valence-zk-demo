@@ -77,7 +77,7 @@ fn main() {
         .to_vec(),
     ]);
     assert_eq!(target_header_root, inputs.ethereum_root_opening.data);
-    // the ethereum state root against which we verify our storage proofs
+    // the ethereum body root against which we verify our execution client state root
     let ethereum_header_body_root = hex::decode(
         &inputs
             .beacon_block_header
