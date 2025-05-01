@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 hex.workspace=true
-ssz-merkleize.workspace=true
 serde_json.workspace=true
 sp1-zkvm.workspace = true
 types = { package = "zk-mailbox-application-types", path = "../zk-mailbox-application-types" }

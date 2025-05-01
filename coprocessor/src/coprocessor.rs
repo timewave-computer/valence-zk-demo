@@ -107,7 +107,7 @@ impl Coprocessor {
         for key in neutron_storage_keys.iter() {
             let proof = self
                 .neutron_coprocessor
-                .get_storage_proof(&key, neutron_height)
+                .get_storage_proof(key, neutron_height)
                 .await;
             let proof: Ics23MerkleProof = serde_json::from_slice(&proof).unwrap();
             neutron_merkle_proofs.push(proof);

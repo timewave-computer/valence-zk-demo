@@ -15,10 +15,8 @@ pub struct MailboxApplicationCircuitInputs {
     pub neutron_root_opening: SmtOpening,
     pub ethereum_root_opening: SmtOpening,
     pub neutron_block_header: tendermint::block::Header,
-    pub beacon_block_header: ssz_merkleize::types::BeaconBlockHeader,
     /// Root of the coprocessor SMT tree
     pub coprocessor_root: [u8; 32],
-    pub temporary_debug_state_root: [u8; 32],
 }
 
 /// Outputs from the mailbox application circuit containing the verified messages

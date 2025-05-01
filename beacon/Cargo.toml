@@ -1,0 +1,15 @@
+[package]
+name = "beacon"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_json.workspace = true
+consensus-types = {package="types",git="https://github.com/sigp/lighthouse"}
+reqwest = {workspace=true,features=["json"]}
+tokio = { version = "1.40.0", features = ["full"]}
+tree_hash = "0.8"
+tree_hash_derive = "0.8"
+lazy_static = "1.5.0"
+itertools.workspace = true
+sha2.workspace = true

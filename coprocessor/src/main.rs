@@ -12,7 +12,6 @@ use clients::{ClientInterface, DefaultClient, EthereumClient, NeutronClient};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use sp1_sdk::include_elf;
-use ssz_merkleize::merkleize::get_beacon_block_header;
 mod constants;
 use std::env;
 mod examples;
@@ -51,8 +50,6 @@ async fn main() {
         .neutron_client
         .get_header_at_height(coprocessor_outputs.0.target_height)
         .await;
-    let beacon_header =
-        get_beacon_block_header(coprocessor_outputs.1.newHead.try_into().unwrap()).await;
     // pass the headers and proof outputs to the application circuit
     let coprocessor_smt_root = coprocessor.smt_root;
 
@@ -64,28 +61,7 @@ async fn main() {
     let ethereum_height_key = hasher.finalize();
     let mut hasher = Sha256::new();
     hasher.update(NEUTRON_ROOT_KEY);
-    let neutron_root_key: sha2::digest::generic_array::GenericArray<
-        u8,
-        sha2::digest::typenum::UInt<
-            sha2::digest::typenum::UInt<
-                sha2::digest::typenum::UInt<
-                    sha2::digest::typenum::UInt<
-                        sha2::digest::typenum::UInt<
-                            sha2::digest::typenum::UInt<
-                                sha2::digest::typenum::UTerm,
-                                sha2::digest::consts::B1,
-                            >,
-                            sha2::digest::consts::B0,
-                        >,
-                        sha2::digest::consts::B0,
-                    >,
-                    sha2::digest::consts::B0,
-                >,
-                sha2::digest::consts::B0,
-            >,
-            sha2::digest::consts::B0,
-        >,
-    > = hasher.finalize();
+    let neutron_root_key = hasher.finalize();
     let mut hasher = Sha256::new();
     hasher.update(ETHEREUM_ROOT_KEY);
     let ethereum_root_key = hasher.finalize();
@@ -118,7 +94,6 @@ async fn main() {
         neutron_root_opening,
         ethereum_root_opening,
         neutron_header,
-        beacon_header,
     )
     .await;
 }
@@ -134,7 +109,7 @@ pub async fn get_execution_block_height(
     let block_number = json["data"]["message"]["body"]["execution_payload"]["block_number"]
         .as_str()
         .ok_or("Missing block_number")?;
-    let block_number = u64::from_str_radix(block_number, 10)?;
+    let block_number = block_number.parse::<u64>()?;
     Ok(block_number)
 }
 
