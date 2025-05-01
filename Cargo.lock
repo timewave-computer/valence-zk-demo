@@ -1989,6 +1989,7 @@ dependencies = [
  "itertools 0.14.0",
  "lazy_static",
  "reqwest 0.12.15",
+ "serde",
  "serde_json",
  "sha2 0.10.8",
  "tokio",
