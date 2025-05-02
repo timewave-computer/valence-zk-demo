@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-borsh.workspace = true
+beacon.workspace=true
+serde.workspace = true
+borsh.workspace=true
 valence-coprocessor-core.workspace = true
-valence-smt.workspace = true
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
     "borsh",
     "serde",
@@ -19,3 +20,4 @@ common-merkle-proofs = { package = "common", git = "https://github.com/timewave-
 alloy-primitives.workspace = true
 serde_json.workspace = true
 alloy-rlp = "0.3.11"
+tendermint.workspace = true

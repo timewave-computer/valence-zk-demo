@@ -50,46 +50,14 @@ cp .env.example .env
 
 ### Running Examples
 
-#### Cross-Chain Rate Calculation
-```bash
-cargo run -p coprocessor --release --features rate -- --nocapture
-```
-
-#### Cross-Chain Message Mailbox
+#### Full, production e2e prover with Zk Light Clients and Mailbox Application
 ```bash
 cargo run -p coprocessor --release --features mailbox -- --nocapture
 ```
 
-#### Advanced: Coprocessor Proof Generation
-For near production-grade security guarantees (currently missing ZK light client proofs):
-```bash
-cargo run -p coprocessor --release --features rate --features coprocessor -- --nocapture
-```
-
 ## Benchmarks
 
-ZK Rate Application [here](zk-programs/zk-rate-example/README.md)
-
 ZK Mailbox Application [here](zk-programs/zk-mailbox-example/README.md)
-
-### M3 macbook pro with 64 GB ram
-
-| test name | elapsed time |
-|---|---|
-| rate | 149.5s | 
-| rate + coprocessor | 300.5s |
-| mailbox | 147.1s |
-| mailbox + coprocessor | 288.6s |
-
-### SP1 prover network
-
-| test name | elapsed time |
-|---|---|
-| rate | 35s | 
-| rate + coprocessor | 65.1s |
-| mailbox | 29.2s |
-| mailbox + coprocessor | 54.6s |
-
 
 ## Project Structure
 
@@ -99,29 +67,9 @@ ZK Mailbox Application [here](zk-programs/zk-mailbox-example/README.md)
   - `coprocessor-circuit-sp1/`: Optimized SP1 implementation
   - `coprocessor-circuit-logic/`: Core verification logic
 - `zk-programs/`: Example ZK applications
-  - `zk-rate-application/`: Cross-chain rate calculation
-  - `zk-rate-application-types/`: Type definitions
   - `zk-mailbox-application/`: Cross-chain messaging
 
-## Example 1: Cross-Chain Vault Rate Calculation
-
-The framework includes a practical example demonstrating trustless rate calculation across Ethereum and Neutron vaults. This example showcases:
-
-1. Trustless state verification from multiple blockchains
-2. Secure rate calculation using zero-knowledge proofs
-3. Practical implementation of cross-chain financial primitives
-
-For detailed implementation details, see the [ZK Rate Example README](./zk-programs/zk-rate-example/README.md).
-
-## Security and Trust Model
-
-Valence ZK implements a robust security model:
-
-- **Trusted Roots**: Currently uses trusted roots for verification (planned upgrade to zk light client roots)
-- **Recursive ZK Circuits**: Verifies Merkle proofs against trusted roots
-- **Future-Proof**: Designed for seamless integration with zk light client proofs
-
-## Example 2: Cross-Chain Messenger
+## Example: Cross-Chain Messenger
 
 The framework includes a practical example demonstrating trustless message passing between Ethereum and Neutron mailboxes. This example showcases:
 

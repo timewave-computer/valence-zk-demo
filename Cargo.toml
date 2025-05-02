@@ -4,32 +4,33 @@ members = [
     "coprocessor-proofs/coprocessor-circuit-sp1",
     "coprocessor-proofs/coprocessor-circuit-logic",
     "coprocessor",
-    "zk-programs/zk-rate-example/zk-rate-application",
-    "zk-programs/zk-rate-example/zk-rate-application-types",
     "zk-programs/zk-mailbox-example/zk-mailbox-application",
     "zk-programs/zk-mailbox-example/zk-mailbox-application-types",
+    "beacon",
 ]
+
+[profile.dev]
+opt-level = 3
 
 exclude = [
     "zk-programs/zk-mailbox-example/zk-mailbox-application-contracts/neutron-mailbox-contract",
-    "zk-programs/zk-rate-example/zk-rate-application-contracts/neutron-vault-contract",
 ]
 
 [workspace.dependencies]
+beacon = {path="beacon"}
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+itertools = "0.14"
+tendermint = "0.38.1"
+sha2 = "0.10.8"
+reqwest = "0.12.15"
 zk-mailbox-application = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application" }
 zk-mailbox-application-types = { path = "zk-programs/zk-mailbox-example/zk-mailbox-application-types" }
-zk-rate-application = { path = "zk-programs/zk-rate-example/zk-rate-application" }
-zk-rate-application-types = { path = "zk-programs/zk-rate-example/zk-rate-application-types" }
 coprocessor-circuit-sp1 = { path = "coprocessor-proofs/coprocessor-circuit-sp1" }
 coprocessor-circuit-types = { path = "coprocessor-proofs/coprocessor-circuit-types" }
-valence-coprocessor-core = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
-    "sha2",
-] }
-valence-smt = { git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros", features = [
-    "borsh",
-    "memory",
-], default-features = false }
+valence-coprocessor-core = { package = "valence-coprocessor", git = "https://github.com/jonas089/valence-coprocessor", branch = "feat/sha2-and-derive-macros" }
 alloy-primitives = { version = "0.8.25", features = ["rlp"] }
+alloy-sol-types = "0.7"
 
 common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
 ethereum-merkle-proofs = { package = "ethereum", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", features = [
@@ -48,6 +49,8 @@ sp1-sdk = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fi
 sp1-verifier = { git = "https://github.com/timewave-computer/sp1", branch = "jonas/fix-4.1.7-syscall" }
 serde_json = "1"
 
+anyhow = "1"
 
 [patch.crates-io]
 sha2 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.8-sp1-4.0.0" }
+bls12_381 = { git = "https://github.com/sp1-patches/bls12_381", tag = "patch-0.8.0-sp1-4.0.0" }

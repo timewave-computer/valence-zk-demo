@@ -1,0 +1,20 @@
+[package]
+name = "beacon"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde.workspace=true
+serde_json.workspace = true
+itertools.workspace = true
+sha2.workspace = true
+
+consensus-types = {package="types",git="https://github.com/sigp/lighthouse", optional=true}
+tokio = { version = "1.40.0", features = ["full"], optional=true}
+tree_hash = {version="0.8", optional=true}
+tree_hash_derive = {version="0.8", optional=true}
+lazy_static = {version="1.5.0", optional=true}
+reqwest = {workspace=true,features=["json"], optional=true}
+
+[features]
+no-zkvm=["dep:tokio", "dep:consensus-types", "dep:tree_hash", "dep:tree_hash_derive", "dep:lazy_static", "dep:reqwest"]

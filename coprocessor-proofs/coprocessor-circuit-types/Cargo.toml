@@ -13,5 +13,5 @@ ics23-merkle-proofs = { package = "ics23-cosmos", git = "https://github.com/time
     "serde",
 ], default-features = false }
 common-merkle-proofs = { package = "common", git = "https://github.com/timewave-computer/zk-merkle-proofs", branch = "demo", default-features = false }
+valence-coprocessor-core.workspace = true
 borsh.workspace = true
-valence-smt.workspace = true
