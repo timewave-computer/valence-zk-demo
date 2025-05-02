@@ -63,11 +63,14 @@ fn main() {
     let electra_block_header_root = merkleize_header(inputs.electra_block_header.clone());
     let electra_body_roots = inputs.electra_body_roots;
     let electra_body_root = electra_body_roots.merkelize();
+    // assert that the height of the neutron header is correct
+    assert_eq!(inputs.neutron_block_header.height.value(), u64::from_be_bytes(inputs.neutron_height_opening.data.try_into().unwrap()));
+    // assert that the height of the electra header is correct
+    assert_eq!(inputs.electra_block_header.slot, u64::from_be_bytes(inputs.ethereum_height_opening.data.try_into().unwrap()));
     // verify the block body root against that in the header
     assert_eq!(inputs.electra_block_header.body_root, electra_body_root);
     // verify the header root against the one from the ethereum zk light client in the SMT
     assert_eq!(electra_block_header_root.to_vec(), inputs.ethereum_root_opening.data);
-
     // verify the neutron app hash against the header root
     assert_eq!(tendermint_header_hash, inputs.neutron_root_opening.data);
     // the neutron app hash against which we verify our storage proofs
