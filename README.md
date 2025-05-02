@@ -50,15 +50,9 @@ cp .env.example .env
 
 ### Running Examples
 
-#### Cross-Chain Message Mailbox
+#### Full, production e2e prover with Zk Light Clients and Mailbox Application
 ```bash
 cargo run -p coprocessor --release --features mailbox -- --nocapture
-```
-
-#### Advanced: Coprocessor Proof Generation
-For near production-grade security guarantees (currently missing ZK light client proofs):
-```bash
-cargo run -p coprocessor --release --features mailbox --features coprocessor -- --nocapture
 ```
 
 ## Benchmarks
