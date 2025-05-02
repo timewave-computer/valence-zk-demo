@@ -8,6 +8,7 @@ name = "coprocessor"
 path = "src/main.rs"
 
 [dependencies]
+beacon={workspace=true, features=["no-zkvm"]}
 sha2.workspace=true
 serde_json.workspace = true
 valence-coprocessor-core.workspace = true

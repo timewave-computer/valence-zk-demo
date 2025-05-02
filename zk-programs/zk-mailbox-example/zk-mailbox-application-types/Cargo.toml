@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+beacon.workspace=true
 serde.workspace = true
 borsh.workspace=true
 valence-coprocessor-core.workspace = true

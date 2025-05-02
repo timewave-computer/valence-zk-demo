@@ -17,6 +17,7 @@ exclude = [
 ]
 
 [workspace.dependencies]
+beacon = {path="beacon"}
 hex = "0.4"
 serde = { version = "1", features = ["derive"] }
 itertools = "0.14"

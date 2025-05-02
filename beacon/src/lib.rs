@@ -1,16 +1,21 @@
-use consensus_types::{BeaconBlockHeader, MainnetEthSpec, SignedBeaconBlock, SignedBeaconBlockElectra};
+#[cfg(feature = "no-zkvm")]
+use consensus_types::{MainnetEthSpec, SignedBeaconBlockElectra};
+#[cfg(feature = "no-zkvm")]
+use consensus_types::{BeaconBlockHeader, SignedBeaconBlock};
+#[cfg(feature = "no-zkvm")]
 use tree_hash::TreeHash;
+#[cfg(feature = "no-zkvm")]
 use types::electra::{ElectraBlockBodyPayloadRoots, ElectraBlockBodyRoots};
 pub mod types;
 pub mod helpers;
 
+#[cfg(feature = "no-zkvm")]
 pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader {
     let client = reqwest::Client::new();
     let url = format!(
         "{}/eth/v1/beacon/headers/{}",
         url, slot
     );
-
     let resp = client
         .get(&url)
         .send()
@@ -25,6 +30,7 @@ pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader 
     summary
 }
 
+#[cfg(feature = "no-zkvm")]
 pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra<MainnetEthSpec>{
         let endpoint = format!(
             "{}/eth/v2/beacon/blocks/{}",
@@ -46,6 +52,8 @@ pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra
         let electra_block = block.as_electra().unwrap();
         electra_block.clone()
 }
+
+#[cfg(feature = "no-zkvm")]
 pub fn extract_electra_block_body(electra_block: SignedBeaconBlockElectra<MainnetEthSpec>) -> ElectraBlockBodyRoots{
     let electra_block_body = electra_block.message.body;
     let execution_payload = electra_block_body.execution_payload.execution_payload.clone();
@@ -89,7 +97,7 @@ pub fn extract_electra_block_body(electra_block: SignedBeaconBlockElectra<Mainne
     // todo: create a serialized struct for the field roots and payload field roots and return it
 }
 
-
+#[cfg(feature = "no-zkvm")]
 #[tokio::test]
 async fn test_get_beacon_block_body() {
     let beacon_block_header = get_beacon_block_header(7520257, "https://lodestar-sepolia.chainsafe.io").await;

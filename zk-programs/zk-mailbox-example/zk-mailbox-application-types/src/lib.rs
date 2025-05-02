@@ -1,3 +1,4 @@
+use beacon::types::electra::ElectraBlockBodyRoots;
 use ethereum_merkle_proofs::merkle_lib::types::EthereumMerkleProof;
 use ics23_merkle_proofs::merkle_lib::types::Ics23MerkleProof;
 use serde::{Deserialize, Serialize};
@@ -15,6 +16,7 @@ pub struct MailboxApplicationCircuitInputs {
     pub neutron_root_opening: SmtOpening,
     pub ethereum_root_opening: SmtOpening,
     pub neutron_block_header: tendermint::block::Header,
+    pub electra_body_roots: ElectraBlockBodyRoots,
     /// Root of the coprocessor SMT tree
     pub coprocessor_root: [u8; 32],
 }

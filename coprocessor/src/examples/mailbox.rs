@@ -4,6 +4,7 @@ use crate::{
 };
 use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
+use beacon::{extract_electra_block_body, get_electra_block};
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
@@ -52,6 +53,9 @@ pub async fn prove(
         )
         .await;
 
+    let electra_block = get_electra_block(u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap()), &read_ethereum_consensus_rpc_url()).await;
+    let electra_body_roots = extract_electra_block_body(electra_block);
+
     let mailbox_inputs = MailboxApplicationCircuitInputs {
         neutron_storage_proofs: domain_state_proofs.0,
         ethereum_storage_proofs: domain_state_proofs.1,
@@ -60,6 +64,7 @@ pub async fn prove(
         neutron_root_opening,
         ethereum_root_opening,
         neutron_block_header,
+        electra_body_roots,
         coprocessor_root: coprocessor.smt_root,
     };
     let prover = ProverClient::from_env();
