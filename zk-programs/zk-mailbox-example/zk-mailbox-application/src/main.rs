@@ -3,6 +3,11 @@ use beacon::merkleize_header;
 // Important Note! There is a constraint missing in this example!
 // We also need to constrain the keys that are being opened on the different domains.
 // How exactly we do this might depend on the type of application we are writing.
+
+// For this example you would also want to constrain the address of the smart contract that is used 
+// for merkle proof verification on Ethereum, the Key that is used in the merkle proof on Ethereum,
+// and the storage key on Neutron that is used for the storage proof verification.
+
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
 use types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
