@@ -103,7 +103,7 @@ fn main() {
         // then we verify the account proof against the state root
         ethereum_proof
             .0
-            .verify(&inputs.electra_block_header.state_root)
+            .verify(&inputs.electra_body_roots.payload_roots.state_root)
             .expect("Failed to verify Ethereum account proof");
     }
     // verify the neutron storage proofs
