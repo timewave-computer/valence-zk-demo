@@ -77,6 +77,7 @@ fn main() {
     let neutron_app_hash = inputs.neutron_root_opening.data;
     // verify the ethereum storage proofs
     for ethereum_proof in inputs.ethereum_storage_proofs {
+        // for each ethereum proof, we first verify the storage proof against the account hash / address
         ethereum_proof
             .1
             .verify(&ethereum_proof.2)
@@ -84,7 +85,7 @@ fn main() {
         messages.push(deserialize_ethereum_proof_value_as_string(
             ethereum_proof.1.value,
         ));
-        // todo: replace the root with the real state root
+        // then we verify the account proof against the state root
         ethereum_proof
             .0
             .verify(&inputs.electra_block_header.state_root)
@@ -93,7 +94,7 @@ fn main() {
 
     // verify the neutron storage proofs
     for neutron_proof in inputs.neutron_storage_proofs {
-        // verify the proof against the neutron root
+        // verify the storage proof against the neutron root / app hash
         neutron_proof
             .verify(&neutron_app_hash)
             .expect("Failed to verify Neutron storage proof");
