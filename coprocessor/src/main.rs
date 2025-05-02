@@ -13,13 +13,14 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use sp1_sdk::include_elf;
 mod constants;
-use std::env;
+use std::{env, time::Instant};
 mod examples;
 pub const COPROCESSOR_CIRCUIT_ELF: &[u8] = include_elf!("coprocessor-circuit-sp1");
 pub const MAILBOX_APPLICATION_CIRCUIT_ELF: &[u8] = include_elf!("zk-mailbox-application");
 
 #[tokio::main]
 async fn main() {
+    let start_time = Instant::now();
     let mut coprocessor = Coprocessor::from_env();
     let default_client = DefaultClient {
         neutron_client: NeutronClient {
@@ -96,6 +97,8 @@ async fn main() {
         neutron_header,
     )
     .await;
+    let end_time = Instant::now();
+    println!("Time taken: {:?}", end_time.duration_since(start_time));
 }
 
 pub async fn get_execution_block_height(

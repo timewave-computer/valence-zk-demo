@@ -67,6 +67,7 @@ fn main() {
     );
     let tendermint_header_hash = inputs.neutron_block_header.hash().as_bytes().to_vec();
     let electra_block_header_root = merkleize_header(inputs.electra_block_header.clone());
+    let electra_state_root = inputs.electra_body_roots.payload_roots.state_root.clone();
     let electra_body_roots = inputs.electra_body_roots;
     let electra_body_root = electra_body_roots.merkelize();
     // assert that the height of the neutron header is correct
@@ -103,7 +104,7 @@ fn main() {
         // then we verify the account proof against the state root
         ethereum_proof
             .0
-            .verify(&inputs.electra_body_roots.payload_roots.state_root)
+            .verify(&electra_state_root)
             .expect("Failed to verify Ethereum account proof");
     }
     // verify the neutron storage proofs
