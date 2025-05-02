@@ -2195,14 +2195,16 @@ dependencies = [
 [[package]]
 name = "bls12_381"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7bc6d6292be3a19e6379786dac800f551e5865a5bb51ebbe3064ab80433f403"
+source = "git+https://github.com/sp1-patches/bls12_381?tag=patch-0.8.0-sp1-4.0.0#36b2a9d68b40dd08d2b0ac2843769a6a16608c91"
 dependencies = [
+ "cfg-if",
  "digest 0.9.0",
  "ff 0.13.1",
  "group 0.13.0",
+ "hex",
  "pairing 0.23.0",
  "rand_core 0.6.4",
+ "sp1-lib 4.2.0",
  "subtle",
 ]
 
