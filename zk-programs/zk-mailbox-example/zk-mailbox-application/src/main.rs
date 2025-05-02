@@ -16,7 +16,8 @@ use types::{
 use valence_coprocessor_core::MemorySmt;
 sp1_zkvm::entrypoint!(main);
 
-// the fixed keys for the domain roots and heights in the coprocessor SMT
+/// Fixed keys for accessing domain roots and heights in the coprocessor SMT
+/// These keys are used to verify the integrity of cross-chain data between Ethereum and Neutron
 const neutron_height_key: [u8; 32] = [
     5, 92, 226, 28, 182, 227, 244, 206, 139, 106, 219, 203, 86, 167, 223, 128, 79, 231, 159, 227,
     28, 76, 212, 19, 61, 221, 239, 48, 60, 35, 162, 102,
@@ -34,6 +35,20 @@ const ethereum_root_key: [u8; 32] = [
     236, 134, 108, 17, 77, 195, 169, 130, 177, 237, 235, 53,
 ];
 
+/// Main entry point for the ZK Mailbox application circuit
+///
+/// This function implements the core logic for verifying cross-chain messages between Ethereum and Neutron.
+/// It performs the following operations:
+/// 1. Verifies the integrity of domain roots and heights using SMT openings
+/// 2. Validates block headers and their merkle roots
+/// 3. Verifies storage proofs for both chains
+/// 4. Extracts and deserializes messages from both chains
+///
+/// # Inputs
+/// The circuit expects a serialized `MailboxApplicationCircuitInputs` containing all necessary proofs and headers
+///
+/// # Outputs
+/// The circuit produces a serialized `MailboxApplicationCircuitOutputs` containing verified messages and the final coprocessor root
 fn main() {
     let mut messages: Vec<String> = Vec::new();
     let inputs: MailboxApplicationCircuitInputs =

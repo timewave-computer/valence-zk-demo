@@ -17,8 +17,8 @@ pub fn coprocessor_logic(inputs: CoprocessorCircuitInputs) -> [u8; 32] {
 
     // these are the targets that we want to insert and commit
     let target_neutron_height: u64 = neutron_output.target_height;
-    let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
     let target_neutron_root: Vec<u8> = neutron_output.target_header_hash.to_vec();
+    let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
     let target_ethereum_root: Vec<u8> = helios_output.newHeader.to_vec();
 
     // verify the smt inserts of these targets

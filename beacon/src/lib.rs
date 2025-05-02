@@ -12,6 +12,18 @@ use types::electra::{ElectraBlockBodyPayloadRoots, ElectraBlockBodyRoots};
 pub mod helpers;
 pub mod types;
 
+/// Computes the merkle root of an Electra block header
+///
+/// This function takes an Electra block header and computes its merkle root by:
+/// 1. Padding the slot and proposer index to 32 bytes
+/// 2. Combining them with the parent root, state root, and body root
+/// 3. Computing the merkle root of the resulting container
+///
+/// # Arguments
+/// * `header` - The Electra block header to merkleize
+///
+/// # Returns
+/// The 32-byte merkle root of the header
 pub fn merkleize_header(header: ElectraBlockHeader) -> [u8; 32] {
     let slot_padded: Vec<u8> = header
         .slot
@@ -38,6 +50,17 @@ pub fn merkleize_header(header: ElectraBlockHeader) -> [u8; 32] {
 }
 
 #[cfg(feature = "no-zkvm")]
+/// Fetches a beacon block header from a specified Ethereum beacon node
+///
+/// # Arguments
+/// * `slot` - The slot number of the block header to fetch
+/// * `url` - The URL of the beacon node to query
+///
+/// # Returns
+/// The requested beacon block header
+///
+/// # Errors
+/// Returns an error if the request fails or the response cannot be parsed
 pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader {
     let client = reqwest::Client::new();
     let url = format!("{}/eth/v1/beacon/headers/{}", url, slot);
@@ -57,6 +80,17 @@ pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader 
 }
 
 #[cfg(feature = "no-zkvm")]
+/// Fetches an Electra block from a specified Ethereum beacon node
+///
+/// # Arguments
+/// * `slot` - The slot number of the block to fetch
+/// * `url` - The URL of the beacon node to query
+///
+/// # Returns
+/// The requested Electra block
+///
+/// # Errors
+/// Returns an error if the request fails or the response cannot be parsed
 pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra<MainnetEthSpec> {
     let endpoint = format!("{}/eth/v2/beacon/blocks/{}", url, slot);
     let client = reqwest::Client::new();
@@ -77,6 +111,16 @@ pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra
 }
 
 #[cfg(feature = "no-zkvm")]
+/// Extracts and computes the merkle roots of an Electra block body
+///
+/// This function takes an Electra block and computes the merkle roots for all its components,
+/// including the execution payload and various block body fields.
+///
+/// # Arguments
+/// * `electra_block` - The Electra block to process
+///
+/// # Returns
+/// A struct containing all the computed merkle roots for the block body
 pub fn extract_electra_block_body(
     electra_block: SignedBeaconBlockElectra<MainnetEthSpec>,
 ) -> ElectraBlockBodyRoots {
@@ -137,11 +181,16 @@ pub fn extract_electra_block_body(
             .tree_hash_root()
             .into(),
     }
-    // todo: create a serialized struct for the field roots and payload field roots and return it
 }
 
 #[cfg(feature = "no-zkvm")]
 #[tokio::test]
+/// Tests the functionality of fetching and processing beacon block bodies
+///
+/// This test verifies that:
+/// 1. We can fetch a beacon block header
+/// 2. We can fetch and process the corresponding block
+/// 3. The computed merkle roots match the expected values
 async fn test_get_beacon_block_body() {
     let beacon_block_header =
         get_beacon_block_header(7520257, "https://lodestar-sepolia.chainsafe.io").await;

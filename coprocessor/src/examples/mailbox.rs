@@ -44,10 +44,13 @@ pub async fn prove(
         get_execution_block_height(&read_ethereum_consensus_rpc_url(), beacon_block_slot)
             .await
             .unwrap();
+    let neutron_target_height =
+        u64::from_be_bytes(neutron_height_opening.data.clone().try_into().unwrap());
     // Get the Merkle proofs for the Neutron and Ethereum mailbox keys that we constructed above
     let domain_state_proofs = coprocessor
         .get_storage_merkle_proofs(
-            u64::from_be_bytes(neutron_height_opening.data.clone().try_into().unwrap()),
+            // the app hash of the current block attests to the state of the previous block
+            neutron_target_height - 1,
             ethereum_height,
             vec![neutron_mailbox_messages_key],
             vec![(
@@ -73,6 +76,7 @@ pub async fn prove(
         state_root: electra_block_header.state_root.into(),
         body_root: electra_block_header.body_root.into(),
     };
+
     // Construct the Zk-friendly Mailbox Application Circuit inputs
     let mailbox_inputs = MailboxApplicationCircuitInputs {
         neutron_storage_proofs: domain_state_proofs.0,
