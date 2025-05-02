@@ -39,13 +39,11 @@ fn main() {
     let inputs: MailboxApplicationCircuitInputs =
         serde_json::from_slice::<MailboxApplicationCircuitInputs>(&sp1_zkvm::io::read_vec())
             .expect("Failed to deserialize MailboxApplicationCircuitInputs");
-
     // constrain that the keys for the merkle openings of the domain roots in the coprocessor are correct
     assert_eq!(inputs.neutron_height_opening.key, neutron_height_key);
     assert_eq!(inputs.ethereum_height_opening.key, ethereum_height_key);
     assert_eq!(inputs.neutron_root_opening.key, neutron_root_key);
     assert_eq!(inputs.ethereum_root_opening.key, ethereum_root_key);
-
     // constrain that the merkle openings of the domain roots and heights against the coprocessor are correct
     MemorySmt::verify(
         "demo",
@@ -108,7 +106,6 @@ fn main() {
             .verify(&inputs.electra_block_header.state_root)
             .expect("Failed to verify Ethereum account proof");
     }
-
     // verify the neutron storage proofs
     for neutron_proof in inputs.neutron_storage_proofs {
         // verify the storage proof against the neutron root / app hash

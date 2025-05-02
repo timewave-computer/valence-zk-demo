@@ -1,43 +1,46 @@
 #[cfg(feature = "no-zkvm")]
-use consensus_types::{MainnetEthSpec, SignedBeaconBlockElectra};
-#[cfg(feature = "no-zkvm")]
 use consensus_types::{BeaconBlockHeader, SignedBeaconBlock};
+#[cfg(feature = "no-zkvm")]
+use consensus_types::{MainnetEthSpec, SignedBeaconBlockElectra};
 use helpers::merkleize_container;
+use itertools::Itertools;
 #[cfg(feature = "no-zkvm")]
 use tree_hash::TreeHash;
 use types::electra::ElectraBlockHeader;
 #[cfg(feature = "no-zkvm")]
 use types::electra::{ElectraBlockBodyPayloadRoots, ElectraBlockBodyRoots};
-use itertools::Itertools;
-pub mod types;
 pub mod helpers;
+pub mod types;
 
 pub fn merkleize_header(header: ElectraBlockHeader) -> [u8; 32] {
     let slot_padded: Vec<u8> = header
-    .slot
-    .to_le_bytes()
-    .iter()
-    .copied() // Convert from &u8 to u8
-    .pad_using(32, |_| 0u8) // Pad with zeros to 32 bytes
-    .collect();
+        .slot
+        .to_le_bytes()
+        .iter()
+        .copied() // Convert from &u8 to u8
+        .pad_using(32, |_| 0u8) // Pad with zeros to 32 bytes
+        .collect();
 
     let proposer_index_padded: Vec<u8> = header
-    .proposer_index
-    .to_le_bytes()
-    .iter()
-    .copied()
-    .pad_using(32, |_| 0u8)
-    .collect();
-    merkleize_container(vec![slot_padded.try_into().unwrap(), proposer_index_padded.try_into().unwrap(), header.parent_root, header.state_root, header.body_root])
+        .proposer_index
+        .to_le_bytes()
+        .iter()
+        .copied()
+        .pad_using(32, |_| 0u8)
+        .collect();
+    merkleize_container(vec![
+        slot_padded.try_into().unwrap(),
+        proposer_index_padded.try_into().unwrap(),
+        header.parent_root,
+        header.state_root,
+        header.body_root,
+    ])
 }
 
 #[cfg(feature = "no-zkvm")]
 pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader {
     let client = reqwest::Client::new();
-    let url = format!(
-        "{}/eth/v1/beacon/headers/{}",
-        url, slot
-    );
+    let url = format!("{}/eth/v1/beacon/headers/{}", url, slot);
     let resp = client
         .get(&url)
         .send()
@@ -45,42 +48,45 @@ pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader 
         .unwrap()
         .error_for_status()
         .unwrap()
-        .json::<serde_json::Value>() 
+        .json::<serde_json::Value>()
         .await
         .unwrap();
-    let summary: BeaconBlockHeader = serde_json::from_value(resp["data"]["header"]["message"].clone()).unwrap();
+    let summary: BeaconBlockHeader =
+        serde_json::from_value(resp["data"]["header"]["message"].clone()).unwrap();
     summary
 }
 
 #[cfg(feature = "no-zkvm")]
-pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra<MainnetEthSpec>{
-        let endpoint = format!(
-            "{}/eth/v2/beacon/blocks/{}",
-            url,
-            slot
-        );
-        let client = reqwest::Client::new();
-        let resp = client
-            .get(endpoint)
-            .send()
-            .await
-            .expect("Request failed")
-            .error_for_status()
-            .expect("Non-200 response");
-    
-        let json: serde_json::Value = resp.json().await.expect("Invalid JSON");
-        let block_data = json["data"].clone();
-        let block: SignedBeaconBlock<MainnetEthSpec> = serde_json::from_value(block_data).expect("Deserialization failed");
-        let electra_block = block.as_electra().unwrap();
-        electra_block.clone()
+pub async fn get_electra_block(slot: u64, url: &str) -> SignedBeaconBlockElectra<MainnetEthSpec> {
+    let endpoint = format!("{}/eth/v2/beacon/blocks/{}", url, slot);
+    let client = reqwest::Client::new();
+    let resp = client
+        .get(endpoint)
+        .send()
+        .await
+        .expect("Request failed")
+        .error_for_status()
+        .expect("Non-200 response");
+
+    let json: serde_json::Value = resp.json().await.expect("Invalid JSON");
+    let block_data = json["data"].clone();
+    let block: SignedBeaconBlock<MainnetEthSpec> =
+        serde_json::from_value(block_data).expect("Deserialization failed");
+    let electra_block = block.as_electra().unwrap();
+    electra_block.clone()
 }
 
 #[cfg(feature = "no-zkvm")]
-pub fn extract_electra_block_body(electra_block: SignedBeaconBlockElectra<MainnetEthSpec>) -> ElectraBlockBodyRoots{
+pub fn extract_electra_block_body(
+    electra_block: SignedBeaconBlockElectra<MainnetEthSpec>,
+) -> ElectraBlockBodyRoots {
     let electra_block_body = electra_block.message.body;
-    let execution_payload = electra_block_body.execution_payload.execution_payload.clone();
+    let execution_payload = electra_block_body
+        .execution_payload
+        .execution_payload
+        .clone();
 
-    let payload_roots = ElectraBlockBodyPayloadRoots{
+    let payload_roots = ElectraBlockBodyPayloadRoots {
         parent_hash: execution_payload.parent_hash.tree_hash_root().into(),
         fee_recipient: execution_payload.fee_recipient.tree_hash_root().into(),
         // raw state root
@@ -101,20 +107,35 @@ pub fn extract_electra_block_body(electra_block: SignedBeaconBlockElectra<Mainne
         blob_gas_used: execution_payload.blob_gas_used.tree_hash_root().into(),
         excess_blob_gas: execution_payload.excess_blob_gas.tree_hash_root().into(),
     };
-    ElectraBlockBodyRoots{
+    ElectraBlockBodyRoots {
         randao_reveal: electra_block_body.randao_reveal.tree_hash_root().into(),
         eth1_data: electra_block_body.eth1_data.tree_hash_root().into(),
         graffiti: electra_block_body.graffiti.tree_hash_root().into(),
-        proposer_slashings: electra_block_body.proposer_slashings.tree_hash_root().into(),
-        attester_slashings: electra_block_body.attester_slashings.tree_hash_root().into(),
+        proposer_slashings: electra_block_body
+            .proposer_slashings
+            .tree_hash_root()
+            .into(),
+        attester_slashings: electra_block_body
+            .attester_slashings
+            .tree_hash_root()
+            .into(),
         attestations: electra_block_body.attestations.tree_hash_root().into(),
         deposits: electra_block_body.deposits.tree_hash_root().into(),
         voluntary_exits: electra_block_body.voluntary_exits.tree_hash_root().into(),
         sync_aggregate: electra_block_body.sync_aggregate.tree_hash_root().into(),
         payload_roots,
-        bls_to_execution_changes: electra_block_body.bls_to_execution_changes.tree_hash_root().into(),
-        blob_kzg_commitments: electra_block_body.blob_kzg_commitments.tree_hash_root().into(),
-        execution_requests: electra_block_body.execution_requests.tree_hash_root().into(),
+        bls_to_execution_changes: electra_block_body
+            .bls_to_execution_changes
+            .tree_hash_root()
+            .into(),
+        blob_kzg_commitments: electra_block_body
+            .blob_kzg_commitments
+            .tree_hash_root()
+            .into(),
+        execution_requests: electra_block_body
+            .execution_requests
+            .tree_hash_root()
+            .into(),
     }
     // todo: create a serialized struct for the field roots and payload field roots and return it
 }
@@ -122,7 +143,8 @@ pub fn extract_electra_block_body(electra_block: SignedBeaconBlockElectra<Mainne
 #[cfg(feature = "no-zkvm")]
 #[tokio::test]
 async fn test_get_beacon_block_body() {
-    let beacon_block_header = get_beacon_block_header(7520257, "https://lodestar-sepolia.chainsafe.io").await;
+    let beacon_block_header =
+        get_beacon_block_header(7520257, "https://lodestar-sepolia.chainsafe.io").await;
     // Lodestar Sepolia endpoint
     let endpoint = format!(
         "https://lodestar-sepolia.chainsafe.io/eth/v2/beacon/blocks/{}",
@@ -140,13 +162,17 @@ async fn test_get_beacon_block_body() {
 
     let json: serde_json::Value = resp.json().await.expect("Invalid JSON");
     let block_data = json["data"].clone();
-    let block: SignedBeaconBlock<MainnetEthSpec> = serde_json::from_value(block_data).expect("Deserialization failed");
+    let block: SignedBeaconBlock<MainnetEthSpec> =
+        serde_json::from_value(block_data).expect("Deserialization failed");
     let electra_block = block.as_electra().unwrap();
     let electra_block_body = extract_electra_block_body(electra_block.clone());
     let electra_block_body_root = electra_block_body.merkelize();
 
-    assert_eq!(electra_block_body_root.to_vec(), beacon_block_header.body_root.to_vec());
-    let electra_block_header = ElectraBlockHeader{
+    assert_eq!(
+        electra_block_body_root.to_vec(),
+        beacon_block_header.body_root.to_vec()
+    );
+    let electra_block_header = ElectraBlockHeader {
         slot: beacon_block_header.slot.as_u64(),
         proposer_index: beacon_block_header.proposer_index,
         parent_root: beacon_block_header.parent_root.into(),
@@ -154,5 +180,8 @@ async fn test_get_beacon_block_body() {
         body_root: beacon_block_header.body_root.into(),
     };
     let beacon_block_header_root = merkleize_header(electra_block_header);
-    assert_eq!(beacon_block_header_root.to_vec(), beacon_block_header.tree_hash_root().to_vec());
+    assert_eq!(
+        beacon_block_header_root.to_vec(),
+        beacon_block_header.tree_hash_root().to_vec()
+    );
 }

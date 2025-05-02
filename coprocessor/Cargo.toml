@@ -8,8 +8,8 @@ name = "coprocessor"
 path = "src/main.rs"
 
 [dependencies]
-beacon={workspace=true, features=["no-zkvm"]}
-sha2.workspace=true
+beacon = { workspace = true, features = ["no-zkvm"] }
+sha2.workspace = true
 serde_json.workspace = true
 valence-coprocessor-core.workspace = true
 borsh.workspace = true
@@ -25,7 +25,7 @@ tendermint.workspace = true
 alloy = { version = "0.12.5", features = ["full"] }
 alloy-primitives.workspace = true
 alloy-sol-types.workspace = true
-serde = {version="1", features=["derive"]}
+serde = { version = "1", features = ["derive"] }
 serde_cbor = "0.11.2"
 hex = "0.4"
 tokio = { version = "1.41.1", features = ["full"] }

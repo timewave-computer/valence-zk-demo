@@ -22,6 +22,9 @@ pub async fn prove(
     ethereum_root_opening: SmtOpening,
     neutron_block_header: Header,
 ) {
+    // we want to prove the Neutron mailbox message at key 1 e.g. the first message that is "Hello Ethereum!"
+    // when proving a value in ZK, the app developer should be confident that it exists on the target domain
+    // If it doesn't exist, then the prover will fail
     let neutron_mailbox_messages_key = Ics23Key::new_wasm_account_mapping(
         b"messages",
         "1",
@@ -30,18 +33,18 @@ pub async fn prove(
     let slot: U256 = alloy_primitives::U256::from(0);
     let counter = U256::from(1);
     let encoded_key = (counter, slot).abi_encode();
+    // we want to prove the Ethereum mailbox message at key 1 e.g. the first message that is "Hello Neutron!"
     let ethereum_mailbox_messages_key = digest_keccak(&encoded_key).to_vec();
-
     let mut coprocessor = Coprocessor::from_env();
     // todo: get the real ethereum height from the beacon block height
     let beacon_block_slot =
         u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap());
+    // Get the Ethereum execution layer block height for the beacon consensus slot
     let ethereum_height =
         get_execution_block_height(&read_ethereum_consensus_rpc_url(), beacon_block_slot)
             .await
             .unwrap();
-    println!("Ethereum Height: {}", ethereum_height);
-
+    // Get the Merkle proofs for the Neutron and Ethereum mailbox keys that we constructed above
     let domain_state_proofs = coprocessor
         .get_storage_merkle_proofs(
             u64::from_be_bytes(neutron_height_opening.data.clone().try_into().unwrap()),
@@ -53,20 +56,24 @@ pub async fn prove(
             )],
         )
         .await;
-
-
-    let ethereum_slot    = u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap());        
+    let ethereum_slot =
+        u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap());
+    // Get the Electra signed block object from the RPC
     let electra_block = get_electra_block(ethereum_slot, &read_ethereum_consensus_rpc_url()).await;
+    // Extract the body roots from the Electra block
     let electra_body_roots = extract_electra_block_body(electra_block);
-    let electra_block_header = get_beacon_block_header(ethereum_slot, &read_ethereum_consensus_rpc_url()).await;
-    let electra_block_header = ElectraBlockHeader{
+    // Get the Electra block header from the RPC
+    let electra_block_header =
+        get_beacon_block_header(ethereum_slot, &read_ethereum_consensus_rpc_url()).await;
+    // Construct the Zk-friendly Electra block header object
+    let electra_block_header = ElectraBlockHeader {
         slot: electra_block_header.slot.as_u64(),
         proposer_index: electra_block_header.proposer_index,
         parent_root: electra_block_header.parent_root.into(),
         state_root: electra_block_header.state_root.into(),
         body_root: electra_block_header.body_root.into(),
     };
-
+    // Construct the Zk-friendly Mailbox Application Circuit inputs
     let mailbox_inputs = MailboxApplicationCircuitInputs {
         neutron_storage_proofs: domain_state_proofs.0,
         ethereum_storage_proofs: domain_state_proofs.1,
@@ -79,6 +86,7 @@ pub async fn prove(
         electra_body_roots,
         coprocessor_root: coprocessor.smt_root,
     };
+    // Run the Prover for the Application Circuit
     let prover = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
     let (pk, _) = prover.setup(MAILBOX_APPLICATION_CIRCUIT_ELF);

@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::helpers::merkleize_container;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ElectraBlockBodyRoots {
@@ -16,7 +16,6 @@ pub struct ElectraBlockBodyRoots {
     pub bls_to_execution_changes: [u8; 32],
     pub blob_kzg_commitments: [u8; 32],
     pub execution_requests: [u8; 32],
-    
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,9 +58,7 @@ impl ElectraBlockBodyRoots {
             self.execution_requests,
         ])
     }
-
 }
-
 
 impl ElectraBlockBodyPayloadRoots {
     pub fn merkelize(&self) -> [u8; 32] {
@@ -91,7 +88,7 @@ impl ElectraBlockBodyPayloadRoots {
 pub struct ElectraBlockHeader {
     pub slot: u64,
     pub proposer_index: u64,
-    pub parent_root: [u8;32],
-    pub state_root: [u8;32],
-    pub body_root: [u8;32],
+    pub parent_root: [u8; 32],
+    pub state_root: [u8; 32],
+    pub body_root: [u8; 32],
 }

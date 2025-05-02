@@ -19,34 +19,28 @@ pub mod mailbox;
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
     let mut ethereum_operator = SP1HeliosOperator::new();
     // todo: remove hardcoded ethereum height and replace it with a real trusted height
-    let ethereum_light_client_proof = ethereum_operator.run(7520256).await;
+    let ethereum_light_client_proof = ethereum_operator.run(7536640).await;
     let ethereum_light_client_proof = ethereum_light_client_proof.unwrap().unwrap();
     let helios_proof_serialized = ethereum_light_client_proof.bytes();
     let helios_public_values = ethereum_light_client_proof.public_values.to_vec();
     let helios_vk = ethereum_operator.get_vk();
-
-    // todo: set the trusted values for Ethereum
     let neutron_operator = SP1TendermintOperator::new(
         coprocessor.trusted_neutron_height,
         coprocessor.target_neutron_height,
     );
     let neutron_light_client_proof = neutron_operator.run().await;
-
     let neutron_proof_serialized = neutron_light_client_proof.bytes();
     let neutron_public_values = neutron_light_client_proof.public_values.to_vec();
     let neutron_vk = neutron_operator.get_vk();
-
     let neutron_output: TendermintOutput =
         serde_json::from_slice(&neutron_light_client_proof.public_values.to_vec()).unwrap();
     let helios_output: ProofOutputs =
         ProofOutputs::abi_decode(&ethereum_light_client_proof.public_values.to_vec(), false)
             .unwrap();
-
     let target_neutron_root: Vec<u8> = neutron_output.target_header_hash.to_vec();
     let target_ethereum_root: Vec<u8> = helios_output.newHeader.to_vec();
     let target_neutron_height: u64 = neutron_output.target_height;
     let target_ethereum_height: u64 = helios_output.newHead.try_into().unwrap();
-
     let mut coprocessor_root = coprocessor.smt_root;
     let mut hasher = Sha256::new();
     hasher.update(NEUTRON_HEIGHT_KEY);
@@ -60,7 +54,6 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     let mut hasher = Sha256::new();
     hasher.update(ETHEREUM_ROOT_KEY);
     let ethereum_root_key = hasher.finalize();
-
     coprocessor_root = coprocessor
         .smt_tree
         .insert(
@@ -70,7 +63,6 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             target_neutron_height.to_be_bytes().to_vec(),
         )
         .expect("Failed to insert Neutron Height");
-
     coprocessor_root = coprocessor
         .smt_tree
         .insert(
@@ -80,7 +72,6 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             target_ethereum_height.to_be_bytes().to_vec(),
         )
         .expect("Failed to insert Ethereum Height");
-
     coprocessor_root = coprocessor
         .smt_tree
         .insert(
@@ -90,7 +81,6 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             target_neutron_root.clone(),
         )
         .expect("Failed to insert Ethereum Root");
-
     coprocessor_root = coprocessor
         .smt_tree
         .insert(
@@ -100,9 +90,7 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
             target_ethereum_root.clone(),
         )
         .expect("Failed to insert Ethereum Root");
-
     coprocessor.smt_root = coprocessor_root;
-
     let neutron_height_opening = coprocessor
         .smt_tree
         .get_opening("demo", coprocessor_root, &neutron_height_key)
@@ -123,12 +111,10 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         .get_opening("demo", coprocessor_root, &ethereum_root_key)
         .unwrap()
         .unwrap();
-
     coprocessor.trusted_neutron_height = neutron_output.trusted_height;
     coprocessor.trusted_ethereum_height = helios_output.prevHead.try_into().unwrap();
     coprocessor.trusted_neutron_root = neutron_output.target_header_hash.to_vec();
     coprocessor.trusted_ethereum_root = helios_output.prevHeader.to_vec();
-
     let coprocessor_inputs = CoprocessorCircuitInputs {
         helios_proof: helios_proof_serialized,
         helios_public_values,
@@ -146,13 +132,12 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         ethereum_root_opening,
         coprocessor_root,
     };
-
     let coprocessor_circuit_inputs_serialized = borsh::to_vec(&coprocessor_inputs).unwrap();
     let client = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
     stdin.write_vec(coprocessor_circuit_inputs_serialized);
     let (pk, vk) = client.setup(COPROCESSOR_CIRCUIT_ELF);
-    // this is the coprocessor update proof
+    // This is the coprocessor update proof
     // that contains the new roots from the zk light clients
     // all future proofs can be verified against the state in this smt
     let proof = client
@@ -160,10 +145,9 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
         .groth16()
         .run()
         .expect("Failed to prove");
-
-    // this verification should happen on-chain
+    // This verification should happen on-chain
     // our co-processor must adapt the new state
-    // for this we must serialize the outputs so that the
+    // We must serialize the circuit outputs so that the
     // target chain can understand them
     let groth16_vk = *sp1_verifier::GROTH16_VK_BYTES;
     Groth16Verifier::verify(
@@ -176,9 +160,8 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     (neutron_output, helios_output)
 }
 
-
 #[test]
-fn generate_constants(){
+fn generate_constants() {
     let mut hasher = Sha256::new();
     hasher.update(NEUTRON_HEIGHT_KEY);
     let neutron_height_key = hasher.finalize();

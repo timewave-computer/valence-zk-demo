@@ -1,5 +1,5 @@
 use sha2::{Digest, Sha256};
-pub (crate)fn merkleize_container(field_roots: Vec<[u8; 32]>) -> [u8; 32] {
+pub(crate) fn merkleize_container(field_roots: Vec<[u8; 32]>) -> [u8; 32] {
     let count = field_roots.len();
     let next_pow2 = count.next_power_of_two();
     let mut leaves = field_roots;
