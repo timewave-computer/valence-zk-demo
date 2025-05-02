@@ -10,12 +10,35 @@ use types::{
 };
 use valence_coprocessor_core::MemorySmt;
 sp1_zkvm::entrypoint!(main);
+
+
+/*
+
+neutron_height_key: [5, 92, 226, 28, 182, 227, 244, 206, 139, 106, 219, 203, 86, 167, 223, 128, 79, 231, 159, 227, 28, 76, 212, 19, 61, 221, 239, 48, 60, 35, 162, 102]
+ethereum_height_key: [225, 27, 47, 17, 45, 96, 202, 66, 172, 66, 54, 240, 184, 154, 153, 9, 185, 64, 83, 168, 31, 33, 96, 209, 59, 84, 151, 70, 51, 237, 68, 17]
+neutron_root_key: [100, 199, 198, 130, 151, 99, 36, 184, 143, 64, 220, 2, 6, 249, 213, 207, 53, 9, 111, 146, 62, 7, 251, 165, 129, 136, 106, 115, 4, 154, 4, 226]
+ethereum_root_key: [219, 255, 51, 188, 30, 184, 227, 102, 147, 124, 35, 50, 152, 96, 225, 175, 84, 57, 208, 125, 236, 134, 108, 17, 77, 195, 169, 130, 177, 237, 235, 53]
+
+*/
+
+const neutron_height_key: [u8;32] = [5, 92, 226, 28, 182, 227, 244, 206, 139, 106, 219, 203, 86, 167, 223, 128, 79, 231, 159, 227, 28, 76, 212, 19, 61, 221, 239, 48, 60, 35, 162, 102];
+const ethereum_height_key: [u8;32] = [225, 27, 47, 17, 45, 96, 202, 66, 172, 66, 54, 240, 184, 154, 153, 9, 185, 64, 83, 168, 31, 33, 96, 209, 59, 84, 151, 70, 51, 237, 68, 17];
+const neutron_root_key: [u8;32] = [100, 199, 198, 130, 151, 99, 36, 184, 143, 64, 220, 2, 6, 249, 213, 207, 53, 9, 111, 146, 62, 7, 251, 165, 129, 136, 106, 115, 4, 154, 4, 226];
+const ethereum_root_key: [u8;32] = [219, 255, 51, 188, 30, 184, 227, 102, 147, 124, 35, 50, 152, 96, 225, 175, 84, 57, 208, 125, 236, 134, 108, 17, 77, 195, 169, 130, 177, 237, 235, 53];
+
 fn main() {
     let mut messages: Vec<String> = Vec::new();
     let inputs: MailboxApplicationCircuitInputs =
         serde_json::from_slice::<MailboxApplicationCircuitInputs>(&sp1_zkvm::io::read_vec())
             .expect("Failed to deserialize MailboxApplicationCircuitInputs");
-    // todo: constrain the keys that are being used to match the deterministic keys for the domains
+
+    // constrain that the keys for the merkle openings of the domain roots in the coprocessor are correct
+    assert_eq!(inputs.neutron_height_opening.key, neutron_height_key);
+    assert_eq!(inputs.ethereum_height_opening.key, ethereum_height_key);
+    assert_eq!(inputs.neutron_root_opening.key, neutron_root_key);
+    assert_eq!(inputs.ethereum_root_opening.key, ethereum_root_key);
+
+    // constrain that the merkle openings of the domain roots and heights against the coprocessor are correct
     MemorySmt::verify(
         "demo",
         &inputs.coprocessor_root,

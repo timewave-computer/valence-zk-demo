@@ -175,3 +175,32 @@ pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutp
     .unwrap();
     (neutron_output, helios_output)
 }
+
+
+#[test]
+fn generate_constants(){
+    let mut hasher = Sha256::new();
+    hasher.update(NEUTRON_HEIGHT_KEY);
+    let neutron_height_key = hasher.finalize();
+    let mut hasher = Sha256::new();
+    hasher.update(ETHEREUM_HEIGHT_KEY);
+    let ethereum_height_key = hasher.finalize();
+    let mut hasher = Sha256::new();
+    hasher.update(NEUTRON_ROOT_KEY);
+    let neutron_root_key = hasher.finalize();
+    let mut hasher = Sha256::new();
+    hasher.update(ETHEREUM_ROOT_KEY);
+    let ethereum_root_key = hasher.finalize();
+    println!("neutron_height_key: {:?}", neutron_height_key);
+    println!("ethereum_height_key: {:?}", ethereum_height_key);
+    println!("neutron_root_key: {:?}", neutron_root_key);
+    println!("ethereum_root_key: {:?}", ethereum_root_key);
+}
+/*
+
+neutron_height_key: [5, 92, 226, 28, 182, 227, 244, 206, 139, 106, 219, 203, 86, 167, 223, 128, 79, 231, 159, 227, 28, 76, 212, 19, 61, 221, 239, 48, 60, 35, 162, 102]
+ethereum_height_key: [225, 27, 47, 17, 45, 96, 202, 66, 172, 66, 54, 240, 184, 154, 153, 9, 185, 64, 83, 168, 31, 33, 96, 209, 59, 84, 151, 70, 51, 237, 68, 17]
+neutron_root_key: [100, 199, 198, 130, 151, 99, 36, 184, 143, 64, 220, 2, 6, 249, 213, 207, 53, 9, 111, 146, 62, 7, 251, 165, 129, 136, 106, 115, 4, 154, 4, 226]
+ethereum_root_key: [219, 255, 51, 188, 30, 184, 227, 102, 147, 124, 35, 50, 152, 96, 225, 175, 84, 57, 208, 125, 236, 134, 108, 17, 77, 195, 169, 130, 177, 237, 235, 53]
+
+*/
