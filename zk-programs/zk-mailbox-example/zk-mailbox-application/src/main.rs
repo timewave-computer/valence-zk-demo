@@ -90,7 +90,7 @@ fn main() {
     // verify the neutron app hash against the header root
     assert_eq!(tendermint_header_hash, inputs.neutron_root_opening.data);
     // the neutron app hash against which we verify our storage proofs
-    let neutron_app_hash = inputs.neutron_root_opening.data;
+    let neutron_app_hash = inputs.neutron_block_header.app_hash.as_bytes();
     // verify the ethereum storage proofs
     for ethereum_proof in inputs.ethereum_storage_proofs {
         // for each ethereum proof, we first verify the storage proof against the account hash / address
