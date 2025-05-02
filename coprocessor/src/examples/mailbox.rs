@@ -4,7 +4,8 @@ use crate::{
 };
 use alloy::sol_types::SolValue;
 use alloy_primitives::U256;
-use beacon::{extract_electra_block_body, get_electra_block};
+use beacon::types::electra::ElectraBlockHeader;
+use beacon::{extract_electra_block_body, get_beacon_block_header, get_electra_block};
 use dotenvy::dotenv;
 use ethereum_merkle_proofs::merkle_lib::keccak::digest_keccak;
 use ics23_merkle_proofs::keys::Ics23Key;
@@ -53,8 +54,18 @@ pub async fn prove(
         )
         .await;
 
-    let electra_block = get_electra_block(u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap()), &read_ethereum_consensus_rpc_url()).await;
+
+    let ethereum_slot    = u64::from_be_bytes(ethereum_height_opening.data.clone().try_into().unwrap());        
+    let electra_block = get_electra_block(ethereum_slot, &read_ethereum_consensus_rpc_url()).await;
     let electra_body_roots = extract_electra_block_body(electra_block);
+    let electra_block_header = get_beacon_block_header(ethereum_slot, &read_ethereum_consensus_rpc_url()).await;
+    let electra_block_header = ElectraBlockHeader{
+        slot: electra_block_header.slot.as_u64(),
+        proposer_index: electra_block_header.proposer_index,
+        parent_root: electra_block_header.parent_root.into(),
+        state_root: electra_block_header.state_root.into(),
+        body_root: electra_block_header.body_root.into(),
+    };
 
     let mailbox_inputs = MailboxApplicationCircuitInputs {
         neutron_storage_proofs: domain_state_proofs.0,
@@ -64,6 +75,7 @@ pub async fn prove(
         neutron_root_opening,
         ethereum_root_opening,
         neutron_block_header,
+        electra_block_header,
         electra_body_roots,
         coprocessor_root: coprocessor.smt_root,
     };

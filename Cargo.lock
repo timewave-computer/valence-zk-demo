@@ -10808,6 +10808,7 @@ dependencies = [
 name = "zk-mailbox-application"
 version = "0.1.0"
 dependencies = [
+ "beacon",
  "borsh",
  "common",
  "hex",

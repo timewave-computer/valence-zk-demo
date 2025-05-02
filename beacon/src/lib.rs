@@ -2,12 +2,34 @@
 use consensus_types::{MainnetEthSpec, SignedBeaconBlockElectra};
 #[cfg(feature = "no-zkvm")]
 use consensus_types::{BeaconBlockHeader, SignedBeaconBlock};
+use helpers::merkleize_container;
 #[cfg(feature = "no-zkvm")]
 use tree_hash::TreeHash;
+use types::electra::ElectraBlockHeader;
 #[cfg(feature = "no-zkvm")]
 use types::electra::{ElectraBlockBodyPayloadRoots, ElectraBlockBodyRoots};
+use itertools::Itertools;
 pub mod types;
 pub mod helpers;
+
+pub fn merkleize_header(header: ElectraBlockHeader) -> [u8; 32] {
+    let slot_padded: Vec<u8> = header
+    .slot
+    .to_le_bytes()
+    .iter()
+    .copied() // Convert from &u8 to u8
+    .pad_using(32, |_| 0u8) // Pad with zeros to 32 bytes
+    .collect();
+
+    let proposer_index_padded: Vec<u8> = header
+    .proposer_index
+    .to_le_bytes()
+    .iter()
+    .copied()
+    .pad_using(32, |_| 0u8)
+    .collect();
+    merkleize_container(vec![slot_padded.try_into().unwrap(), proposer_index_padded.try_into().unwrap(), header.parent_root, header.state_root, header.body_root])
+}
 
 #[cfg(feature = "no-zkvm")]
 pub async fn get_beacon_block_header(slot: u64, url: &str) -> BeaconBlockHeader {
@@ -124,4 +146,13 @@ async fn test_get_beacon_block_body() {
     let electra_block_body_root = electra_block_body.merkelize();
 
     assert_eq!(electra_block_body_root.to_vec(), beacon_block_header.body_root.to_vec());
+    let electra_block_header = ElectraBlockHeader{
+        slot: beacon_block_header.slot.as_u64(),
+        proposer_index: beacon_block_header.proposer_index,
+        parent_root: beacon_block_header.parent_root.into(),
+        state_root: beacon_block_header.state_root.into(),
+        body_root: beacon_block_header.body_root.into(),
+    };
+    let beacon_block_header_root = merkleize_header(electra_block_header);
+    assert_eq!(beacon_block_header_root.to_vec(), beacon_block_header.tree_hash_root().to_vec());
 }

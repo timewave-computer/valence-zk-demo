@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use crate::helpers::merkleize_container;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ElectraBlockBodyRoots {
     pub randao_reveal: [u8; 32],
     pub eth1_data: [u8; 32],
@@ -19,7 +19,7 @@ pub struct ElectraBlockBodyRoots {
     
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ElectraBlockBodyPayloadRoots {
     pub parent_hash: [u8; 32],
     pub fee_recipient: [u8; 32],
@@ -85,4 +85,13 @@ impl ElectraBlockBodyPayloadRoots {
             self.excess_blob_gas,
         ])
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ElectraBlockHeader {
+    pub slot: u64,
+    pub proposer_index: u64,
+    pub parent_root: [u8;32],
+    pub state_root: [u8;32],
+    pub body_root: [u8;32],
 }

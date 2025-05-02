@@ -1,16 +1,14 @@
 #![no_main]
-
+use beacon::merkleize_header;
 // Important Note! There is a constraint missing in this example!
 // We also need to constrain the keys that are being opened on the different domains.
 // How exactly we do this might depend on the type of application we are writing.
-
 use common_merkle_proofs::merkle::types::MerkleVerifiable;
 use types::{
     MailboxApplicationCircuitInputs, MailboxApplicationCircuitOutputs,
     deserialize_ethereum_proof_value_as_string, deserialize_neutron_proof_value_as_string,
 };
 use valence_coprocessor_core::MemorySmt;
-
 sp1_zkvm::entrypoint!(main);
 fn main() {
     let mut messages: Vec<String> = Vec::new();
@@ -39,6 +37,14 @@ fn main() {
         &inputs.ethereum_root_opening,
     );
     let tendermint_header_hash = inputs.neutron_block_header.hash().as_bytes().to_vec();
+    let electra_block_header_root = merkleize_header(inputs.electra_block_header.clone());
+    let electra_body_roots = inputs.electra_body_roots;
+    let electra_body_root = electra_body_roots.merkelize();
+    // verify the block body root against that in the header
+    assert_eq!(inputs.electra_block_header.body_root, electra_body_root);
+    // verify the header root against the one from the ethereum zk light client in the SMT
+    assert_eq!(electra_block_header_root.to_vec(), inputs.ethereum_root_opening.data);
+
     // verify the neutron app hash against the header root
     assert_eq!(tendermint_header_hash, inputs.neutron_root_opening.data);
     // the neutron app hash against which we verify our storage proofs
@@ -55,7 +61,7 @@ fn main() {
         // todo: replace the root with the real state root
         ethereum_proof
             .0
-            .verify(&[0;32])
+            .verify(&inputs.electra_block_header.state_root)
             .expect("Failed to verify Ethereum account proof");
     }
 
@@ -69,7 +75,6 @@ fn main() {
             neutron_proof.value,
         ));
     }
-    let output = MailboxApplicationCircuitOutputs { messages };
-
+    let output = MailboxApplicationCircuitOutputs { messages, coprocessor_root: inputs.coprocessor_root };
     sp1_zkvm::io::commit_slice(&borsh::to_vec(&output).unwrap());
 }
