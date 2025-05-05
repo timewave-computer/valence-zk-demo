@@ -1,37 +1,50 @@
 # Valence ZK: Trustless Cross-Chain Development Framework
 
-Valence ZK is a revolutionary framework that simplifies cross-blockchain development by abstracting complex cryptographic operations into a developer-friendly interface. By leveraging zero-knowledge proofs, Valence enables trustless verification of state across multiple blockchain ecosystems, making it possible to build truly decentralized cross-chain applications.
+Valence ZK is a revolutionary framework that enables trustless cross-blockchain development through zero-knowledge proofs. This repository contains a complete end-to-end demo that serves as a feasibility proof and includes numerous re-usable components for integration with the Valence-coprocessor (our interchain development stack).
 
-## Key Features
+## Key Technical Achievements
 
-- **Trustless Cross-Chain Verification**: Verify state across different blockchains without relying on trusted intermediaries
-- **Developer-First Design**: Abstract complex cryptographic operations like Merkle proofs into simple, composable interfaces
-- **Modular Architecture**: Extensible trait system allows easy integration with new blockchain networks
-- **Future-Proof**: Designed for seamless integration with upcoming zk light client proofs
+- **ZK Light Client Integration**: Successfully abstracted and verified zk light client proofs, storing output roots as verified chain state in our SMT (Sparse Merkle Tree)
+- **Universal State Proof System**: Implemented comprehensive state proof verification for both:
+  - EVM (Ethereum) chains with full storage proof verification
+  - Cosmos (Tendermint) chains with ICS23 compliance
+- **Cross-Chain Messaging**: Built a nearly production-ready mailbox application demonstrating trustless message passing between Ethereum and Neutron
+- **Modular Architecture**: Created a flexible framework that can be extended to support additional blockchain ecosystems
+
+## Core Components
+
+### 1. ZK Light Client Integration
+- **Ethereum Light Client**: SP1-based verification of Ethereum consensus state using Helios
+- **Tendermint Light Client**: SP1-based verification of Tendermint chain state
+- **SMT State Management**: Stores and verifies chain state roots in a Sparse Merkle Tree
+
+### 2. State Proof System
+- **EVM Storage Proofs**: Full verification of account and storage proofs
+- **ICS23 Proofs**: Support for Cosmos-style storage proofs
+- **Block Header Verification**: Full storage proof verification against zk light client roots
+
+### 3. Cross-Chain Applications
+- **Mailbox Application**: Nearly production-ready example of cross-chain messaging
+- **Modular Design**: Easy integration of new applications and chains
 
 ## Technical Architecture
 
-Valence ZK implements a sophisticated architecture that combines:
+The framework implements a sophisticated architecture that combines:
 
-1. **Merkle Proof Library**: Generic interface for Merkle proofs across supported chains
-   - Account proofs
-   - Storage proofs
-   - Future: Receipt proofs (ERC20 Transfer logs, L2 chains)
+1. **ZK Light Client Layer**:
+   - SP1-based Ethereum light client (Helios)
+   - SP1-based Tendermint light client
+   - Recursive ZK verification of chain state
 
-2. **Coprocessor Layer**: 
-   - Batches Merkle proofs by target domain
-   - Performs recursive ZK verification
-   - Maintains a Sparse Merkle Tree (SMT) for trusted roots
+2. **State Proof System**:
+   - Generic Merkle proof interface
+   - Account and storage proof verification
+   - Block header verification
 
-3. **Recursive ZK Circuit**:
-   - Domain State Proofs: Verifies individual domain-level Merkle proofs
-   - SMT Update Proofs: Verifies updates to the trusted root SMT
-   - Currently implemented using SP1 prover with Arkworks verifier
-
-The framework currently supports:
-- Ethereum (EVM-compatible chains)
-- Neutron (Cosmos ecosystem)
-- Extensible to any ICS23 or EVM-compatible chain
+3. **Coprocessor Layer**:
+   - SMT-based state management
+   - Batched proof verification
+   - Recursive ZK circuit implementation
 
 ## Getting Started
 
@@ -50,14 +63,10 @@ cp .env.example .env
 
 ### Running Examples
 
-#### Full, production e2e prover with Zk Light Clients and Mailbox Application
+#### Full Production E2E Prover with ZK Light Clients and Mailbox Application
 ```bash
 cargo run -p coprocessor --release --features mailbox -- --nocapture
 ```
-
-## Benchmarks
-
-ZK Mailbox Application [here](zk-programs/zk-mailbox-example/README.md)
 
 ## Project Structure
 
@@ -68,54 +77,26 @@ ZK Mailbox Application [here](zk-programs/zk-mailbox-example/README.md)
   - `coprocessor-circuit-logic/`: Core verification logic
 - `zk-programs/`: Example ZK applications
   - `zk-mailbox-application/`: Cross-chain messaging
-
-## Example: Cross-Chain Messenger
-
-The framework includes a practical example demonstrating trustless message passing between Ethereum and Neutron mailboxes. This example showcases:
-
-For detailed implementation details, see the [ZK Message Example README](./zk-programs/zk-mailbox-example/README.md).
+- `lightclients/`: ZK light client implementations
+  - `helios/`: Ethereum light client
+  - `tendermint/`: Tendermint light client
 
 ## Security and Trust Model
 
 Valence ZK implements a robust security model:
 
-- **Trusted Roots**: Currently uses trusted roots for verification (planned upgrade to zk light client roots)
-- **Recursive ZK Circuits**: Verifies Merkle proofs against trusted roots
-- **Future-Proof**: Designed for seamless integration with zk light client proofs
+- **ZK Light Client Roots**: Verifies chain state using zk light client proofs
+- **Recursive ZK Circuits**: Verifies Merkle proofs against verified roots
+- **SMT State Management**: Maintains verified chain state in a Sparse Merkle Tree
 
-## ZK Light Client Integration Requirements
+## Demo Achievements
 
-To achieve full production-grade security, Valence ZK requires the following steps:
+- [x] Implement ZK light client integration for Ethereum and Neutron
+- [x] Build comprehensive state proof system
+- [x] Create nearly production-ready mailbox application
 
-1. **Deploy Coprocessor State Contract**
-   - Initialize with genesis state for supported chains (e.g., Ethereum and Neutron roots at specific heights)
+## Next Steps
 
-2. **Implement ZK Light Client Interfaces**
-   - Replace mock implementations with real ZK light client integrations
-   - Currently planned implementations:
-     - Ethereum: [Spectre-RAD](https://github.com/jonas089/spectre-rad)
-     - Cosmos ICS23: [TendermintX](https://github.com/succinctlabs/tendermintx)
-
-3. **Circuit Integration**
-   - Implement proof verification logic in the coprocessor circuit
-   - Verify ZK light client proofs against previous chain states
-
-Once these steps are completed, Valence ZK will be production-ready for:
-- Ethereum and Cosmos ICS23 (Tendermint) chains
-- Additional Tendermint chains can be added with their own contract and TendermintX prover instance
-
-## Development Roadmap
-
-- [ ] Deploy coprocessor state contract with genesis state
-- [ ] Implement ZK light client interfaces for Ethereum and Neutron
-- [ ] Integrate ZK light client proof verification in coprocessor circuit
-- [ ] Support alternative environments (Solana)
-- [ ] Enhanced serialization and type system abstractions
-- [ ] Performance optimizations
-- [ ] Deployments and Blockops
-- [ ] Support for receipt proofs (ERC20 events)
-- [ ] Support for Layer 2 EVM networks (Optimism, Arbitrum)
-
-
-> [!NOTE]
-> This repository is under active development. While core functionality is implemented, some features are being enhanced for optimal performance and security.
+- Architectural improvements
+- Integration of ZK Lightclient proofs into the Valence coprocessor
+- Integration of storage proofs and block header validation into the Valence coprocessor

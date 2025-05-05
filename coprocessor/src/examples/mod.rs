@@ -19,7 +19,6 @@ pub mod mailbox;
 pub async fn prove_coprocessor(coprocessor: &mut Coprocessor) -> (TendermintOutput, ProofOutputs) {
     let mut ethereum_operator = SP1HeliosOperator::new();
     // todo: remove hardcoded ethereum height and replace it with a real trusted height
-
     // in production we take our last trusted slot and calculate the current period from the last finalized slot.
     // then we request the update, generate the proof and verify it against the active sync committee.
     // if the proof is valid for that committee and the slot height is greater than the last trusted slot,
