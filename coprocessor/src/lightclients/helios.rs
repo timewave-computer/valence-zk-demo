@@ -30,9 +30,10 @@ impl SP1HeliosOperator {
     async fn request_update(
         &self,
         client: Inner<MainnetConsensusSpec, HttpRpc>,
+        update_count: u8,
     ) -> Result<Option<SP1ProofWithPublicValues>> {
         let mut stdin = SP1Stdin::new();
-        let updates = get_updates(&client).await;
+        let updates = get_updates(&client, update_count).await;
         let finality_update = client.rpc.get_finality_update().await.unwrap();
         // Create program inputs
         let expected_current_slot = client.expected_current_slot();
@@ -52,13 +53,17 @@ impl SP1HeliosOperator {
     }
 
     /// Start the operator.
-    pub async fn run(&mut self, slot: u64) -> Result<Option<SP1ProofWithPublicValues>> {
+    pub async fn run(
+        &mut self,
+        slot: u64,
+        update_count: u8,
+    ) -> Result<Option<SP1ProofWithPublicValues>> {
         let slot: u64 = slot;
         let checkpoint = get_checkpoint(slot).await.unwrap();
         // Get the client from the checkpoint
         let client = get_client(checkpoint).await.unwrap();
         // Request an update
-        self.request_update(client).await
+        self.request_update(client, update_count).await
     }
 
     pub fn get_vk(&self) -> String {
@@ -79,7 +84,7 @@ mod test {
         let mut operator = SP1HeliosOperator::new();
         // for testing we hardcode the latest finalized slot from /eth/v1/beacon/states/finalized/finality_checkpoints
         let proof = operator
-            .run(234644 * 32)
+            .run(234644 * 32, 1)
             .await
             .expect("Failed to prove!")
             .unwrap();
