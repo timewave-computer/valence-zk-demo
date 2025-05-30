@@ -1,3 +1,7 @@
+> [!WARNING]
+> This repository is deprecated since we have a production-ready version of
+> the valence app template [here](https://github.com/timewave-computer/valence-coprocessor-app)
+> 
 # Valence ZK: Trustless Cross-Chain Development Framework
 
 Valence ZK is a revolutionary framework that enables trustless cross-blockchain development through zero-knowledge proofs. This repository contains a complete end-to-end demo that serves as a feasibility proof and includes numerous re-usable components for integration with the Valence-coprocessor (our interchain development stack).
